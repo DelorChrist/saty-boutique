@@ -1,0 +1,243 @@
+<!-- src/app/pages/details-commande/details-commande.component.html -->
+
+<div class="details-commande-page" *ngIf="order">
+  <!-- Bouton retour -->
+  <button type="button" class="back-btn" (click)="goBackToOrders()">
+    ← Retour aux commandes
+  </button>
+
+  <!-- En-tête -->
+  <div class="page-header">
+    <div class="page-header__content">
+      <h1 class="page-title">Commande #{{ order.id }}</h1>
+      <div
+        class="status-badge"
+        [ngClass]="'status-badge--' + getStatusColor(order.status)"
+      >
+        {{ getStatusLabel(order.status) }}
+      </div>
+    </div>
+    <p class="page-subtitle">
+      Passée le {{ formatDate(order.createdAt) }}
+    </p>
+  </div>
+
+  <!-- Timeline de suivi -->
+  <div class="tracking-section">
+    <h2 class="section-title">Suivi de commande</h2>
+
+    <div class="tracking-timeline">
+      <div
+        class="timeline-step"
+        *ngFor="let step of getTimelineSteps(); let i = index"
+        [class.timeline-step--completed]="step.completed"
+        [class.timeline-step--current]="step.current"
+      >
+        <div class="timeline-step__marker">
+          <span class="timeline-step__icon">{{ step.icon }}</span>
+        </div>
+        <div class="timeline-step__content">
+          <p class="timeline-step__label">{{ step.label }}</p>
+          <p class="timeline-step__date" *ngIf="step.date">
+            {{ formatDate(step.date) }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info de livraison estimée -->
+    <div
+      class="delivery-estimate"
+      *ngIf="order?.estimatedDelivery"
+    >
+      <div class="delivery-estimate__icon">📅</div>
+      <div class="delivery-estimate__content">
+        <p class="delivery-estimate__label">Livraison prévue pour le</p>
+        <p class="delivery-estimate__date">
+          {{ formatDate(order.estimatedDelivery) }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Numéro de tracking -->
+    <div class="tracking-number" *ngIf="order.trackingNumber">
+      <p class="tracking-number__label">Numéro de suivi</p>
+      <p class="tracking-number__value">{{ order.trackingNumber }}</p>
+    </div>
+  </div>
+
+  <!-- Grille principale : Articles + Résumé -->
+  <div class="order-grid">
+    <!-- Articles -->
+    <div class="order-section">
+      <h2 class="section-title">
+        Articles ({{ order.items.length }})
+      </h2>
+
+      <div class="items-list">
+        <div class="item-card" *ngFor="let item of order.items">
+          <div class="item-card__image" (click)="goToProduct(item.productId)">
+            <img [src]="item.image" [alt]="item.name" />
+          </div>
+
+          <div class="item-card__info">
+            <h3 class="item-card__name" (click)="goToProduct(item.productId)">
+              {{ item.name }}
+            </h3>
+
+            <div class="item-card__details">
+              <span *ngIf="item.size">Taille: {{ item.size }}</span>
+              <span *ngIf="item.color">Couleur: {{ item.color }}</span>
+              <span>Qté: {{ item.quantity }}</span>
+            </div>
+
+            <p class="item-card__price">
+              {{ formatPrice(item.price) }} FCFA
+              <span class="item-card__subtotal">
+                Sous-total: {{ formatPrice(item.subtotal) }} FCFA
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Résumé & Actions -->
+    <div class="order-sidebar">
+      <!-- Résumé de la commande -->
+      <div class="summary-card">
+        <h3 class="summary-card__title">Résumé</h3>
+
+        <div class="summary-row">
+          <span>Sous-total</span>
+          <span>{{ formatPrice(order.subtotal) }} FCFA</span>
+        </div>
+
+        <div class="summary-row">
+          <span>Livraison</span>
+          <span>{{ formatPrice(order.shippingCost) }} FCFA</span>
+        </div>
+
+        <div class="summary-row" *ngIf="order.discount > 0">
+          <span>Réduction</span>
+          <span class="summary-row--discount">
+            -{{ formatPrice(order.discount) }} FCFA
+          </span>
+        </div>
+
+        <div class="summary-divider"></div>
+
+        <div class="summary-row summary-row--total">
+          <span>Total</span>
+          <span>{{ formatPrice(order.totalFcfa) }} FCFA</span>
+        </div>
+
+        <div class="summary-payment">
+          <div class="summary-payment__row">
+            <span>Méthode de paiement</span>
+            <span>{{ getPaymentMethodLabel(order.paymentMethod) }}</span>
+          </div>
+          <div class="summary-payment__row">
+            <span>Statut du paiement</span>
+            <span
+              class="payment-status"
+              [class.payment-status--paid]="order.paymentStatus === 'paid'"
+              [class.payment-status--pending]="order.paymentStatus === 'pending'"
+            >
+              {{ getPaymentStatusLabel(order.paymentStatus) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Adresse de livraison -->
+      <div class="address-card">
+        <h3 class="address-card__title">Adresse de livraison</h3>
+        <p class="address-card__name">{{ order.shippingAddress.fullName }}</p>
+        <p class="address-card__phone">{{ order.shippingAddress.phone }}</p>
+        <p class="address-card__address">
+          {{ order.shippingAddress.address }}<br />
+          {{ order.shippingAddress.district }}, {{ order.shippingAddress.city }}
+        </p>
+      </div>
+
+      <!-- Note client -->
+      <div class="note-card" *ngIf="order.customerNote">
+        <h3 class="note-card__title">Note</h3>
+        <p class="note-card__text">{{ order.customerNote }}</p>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions-card">
+        <button
+          type="button"
+          class="action-btn action-btn--danger"
+          *ngIf="canCancel"
+          (click)="onCancelOrder()"
+        >
+          ✕ Annuler la commande
+        </button>
+
+        <button
+          type="button"
+          class="action-btn action-btn--warning"
+          *ngIf="canReturn"
+          (click)="onRequestReturn()"
+        >
+          ↩️ Demander un retour
+        </button>
+
+        <button
+          type="button"
+          class="action-btn action-btn--outline"
+          (click)="onContactSupport()"
+        >
+          💬 Contacter le support
+        </button>
+
+        <div class="actions-divider"></div>
+
+        <button
+          type="button"
+          class="action-btn action-btn--secondary"
+          (click)="printInvoice()"
+        >
+          🖨️ Imprimer
+        </button>
+
+        <button
+          type="button"
+          class="action-btn action-btn--secondary"
+          (click)="downloadInvoice()"
+        >
+          📥 Télécharger la facture
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Historique des statuts -->
+  <div class="history-section">
+    <h2 class="section-title">Historique</h2>
+
+    <div class="history-timeline">
+      <div
+        class="history-item"
+        *ngFor="let event of order.statusHistory.slice().reverse()"
+      >
+        <div class="history-item__marker"></div>
+        <div class="history-item__content">
+          <p class="history-item__status">{{ getStatusLabel(event.status) }}</p>
+          <p class="history-item__date">{{ formatDate(event.date) }}</p>
+          <p class="history-item__note" *ngIf="event.note">{{ event.note }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading state -->
+<div class="loading-state" *ngIf="!order">
+  <div class="loading-spinner"></div>
+  <p>Chargement de la commande...</p>
+</div>

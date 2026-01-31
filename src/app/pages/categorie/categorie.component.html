@@ -1,0 +1,122 @@
+<div class="categorie">
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb" *ngIf="category">
+    <a routerLink="/">Accueil</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">{{ category.name }}</span>
+  </nav>
+
+  <!-- Header catégorie -->
+  <header class="categorie__header" *ngIf="category">
+    <h1 class="categorie__title">{{ category.name }}</h1>
+    <p class="categorie__description">{{ category.description }}</p>
+    <p class="categorie__count">{{ filteredProducts.length }} article(s)</p>
+  </header>
+
+  <!-- Filtres & Tri -->
+  <div class="categorie__filters" *ngIf="filteredProducts.length > 0">
+    <span class="categorie__filters-label">Trier par :</span>
+    <button
+      type="button"
+      class="filter-btn"
+      [class.filter-btn--active]="activeSortType === 'default'"
+      (click)="sortBy('default')"
+    >
+      Par défaut
+    </button>
+    <button
+      type="button"
+      class="filter-btn"
+      [class.filter-btn--active]="activeSortType === 'price-asc'"
+      (click)="sortBy('price-asc')"
+    >
+      Prix croissant
+    </button>
+    <button
+      type="button"
+      class="filter-btn"
+      [class.filter-btn--active]="activeSortType === 'price-desc'"
+      (click)="sortBy('price-desc')"
+    >
+      Prix décroissant
+    </button>
+    <button
+      type="button"
+      class="filter-btn"
+      [class.filter-btn--active]="activeSortType === 'name-asc'"
+      (click)="sortBy('name-asc')"
+    >
+      Nom A-Z
+    </button>
+  </div>
+
+  <!-- Catégorie inexistante -->
+  <div class="categorie__error" *ngIf="!category">
+    <div class="categorie__error-icon">❌</div>
+    <h2>Catégorie introuvable</h2>
+    <p>La catégorie que vous recherchez n'existe pas.</p>
+    <button class="btn btn--primary" routerLink="/">
+      Retour à l'accueil
+    </button>
+  </div>
+
+  <!-- Aucun produit -->
+  <div class="categorie__empty" *ngIf="category && filteredProducts.length === 0">
+    <div class="categorie__empty-icon">📦</div>
+    <h2>Aucun produit disponible</h2>
+    <p>Cette catégorie ne contient pas encore de produits.</p>
+    <button class="btn btn--primary" routerLink="/">
+      Découvrir d'autres produits
+    </button>
+  </div>
+
+  <!-- Grille produits -->
+  <section class="categorie__products" *ngIf="filteredProducts.length > 0">
+    <article class="product-card" *ngFor="let product of filteredProducts">
+      <div class="product-card__image-wrapper">
+        <img
+          [src]="product.image"
+          [alt]="product.name"
+          class="product-card__image"
+        />
+
+        <!-- Overlay avec favoris + panier + œil -->
+        <div class="product-card__overlay">
+          <!-- Favoris -->
+          <button
+            type="button"
+            class="product-card__icon-btn product-card__icon-btn--heart"
+            [class.product-card__icon-btn--favorite]="favoritesService.isFavorite(product.id)"
+            (click)="toggleFavorite(product); $event.stopPropagation()"
+            title="Ajouter aux favoris"
+          >
+            ❤️
+          </button>
+
+          <!-- Panier -->
+          <button
+            type="button"
+            class="product-card__icon-btn"
+            (click)="addToCart(product); $event.stopPropagation()"
+            title="Ajouter au panier"
+          >
+            <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
+          </button>
+
+          <!-- Détails -->
+          <button
+            type="button"
+            class="product-card__icon-btn"
+            (click)="goToProduct(product.id); $event.stopPropagation()"
+            title="Voir les détails"
+          >
+            <img src="assets/icons/oeil.svg" alt="Voir les détails" />
+          </button>
+        </div>
+      </div>
+
+      <h3 class="product-card__name">{{ product.name }}</h3>
+      <p class="product-card__price">{{ product.price | number }} FCFA</p>
+    </article>
+  </section>
+</div>

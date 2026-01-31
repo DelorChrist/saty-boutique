@@ -1,0 +1,354 @@
+  <section class="account-page" *ngIf="currentUser">
+    <h1 class="account-title">Votre compte</h1>
+
+    <div class="account-layout">
+      <!-- COLONNE GAUCHE : SIDEBAR -->
+      <aside class="account-sidebar">
+        <div class="account-sidebar__header">
+          <div class="account-sidebar__icon">👤</div>
+          <div>
+            <p class="account-sidebar__title">Votre compte Saty</p>
+            <p class="account-sidebar__name">{{ currentUser.fullName || currentUser.name }}</p>
+          </div>
+        </div>
+
+        <nav class="account-sidebar__nav">
+          <button type="button" (click)="goTo('/commandes')">
+            <span>Vos commandes</span>
+          </button>
+          <button type="button" (click)="goTo('/boite-reception')">
+            <span>Boîte de réception</span>
+          </button>
+          <button type="button" (click)="goTo('/avis')">
+            <span>Vos avis en attente</span>
+          </button>
+          <button type="button" (click)="goTo('/bons-achats')">
+            <span>Bons d'achat</span>
+          </button>
+          <button type="button" (click)="goTo('/favoris')">
+            <span>Favoris</span>
+          </button>
+          <button type="button" (click)="goTo('/mes-adresses')">
+            <span>Mes adresses</span>
+          </button>
+          <button type="button" (click)="goTo('/vus-recemment')">
+            <span>Vus récemment</span>
+          </button>
+        </nav>
+
+        <div class="account-sidebar__section">
+          <p class="account-sidebar__section-title">Gérez votre compte</p>
+          <button type="button" class="account-sidebar__link is-active">
+            Paramètres du compte
+          </button>
+          <button type="button" class="account-sidebar__link" (click)="goTo('/adresses')">
+            Adresses
+          </button>
+          <button type="button" class="account-sidebar__link" (click)="goTo('/prefs-communication')">
+            Préférences de communication
+          </button>
+          <button type="button" class="account-sidebar__link" (click)="onDeleteAccount()">
+            Fermer le compte
+          </button>
+        </div>
+
+        <button type="button" class="account-sidebar__logout" (click)="onLogout()">
+          Déconnexion
+        </button>
+      </aside>
+
+      <!-- COLONNE DROITE : CARTES COMPTE -->
+      <div class="account-main">
+        <div class="account-main__grid">
+          <!-- Informations personnelles -->
+          <article class="account-card">
+            <header class="account-card__header">
+              <h2>Informations personnelles</h2>
+            </header>
+
+            <div class="account-card__body">
+              <p class="account-card__name">
+                {{ currentUser.fullName || currentUser.name }}
+              </p>
+              <p class="account-card__text">
+                {{ currentUser.email }}
+              </p>
+              <p class="account-card__text" *ngIf="currentUser.phone">
+                {{ currentUser.phone }}
+              </p>
+            </div>
+
+            <footer class="account-card__footer">
+              <button type="button" class="link-btn" (click)="toggleEdit()">
+                {{ editing ? 'Annuler' : 'Modifier les informations' }}
+              </button>
+            </footer>
+
+            <!-- Formulaire d’édition inline -->
+            <form
+              *ngIf="editing"
+              [formGroup]="profileForm"
+              (ngSubmit)="onSubmit()"
+              class="account-form"
+              novalidate
+            >
+              <div class="form-group">
+                <label>Nom complet</label>
+                <input type="text" formControlName="fullName" />
+              </div>
+
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" formControlName="email" />
+              </div>
+
+              <div class="form-group">
+                <label>Téléphone</label>
+                <input type="text" formControlName="phone" />
+              </div>
+
+              <button
+                type="submit"
+                class="btn-primary"
+                [disabled]="saving || profileForm.invalid"
+              >
+                Enregistrer
+              </button>
+            </form>
+          </article>
+
+          <!-- Adresses -->
+          <article class="account-card">
+            <header class="account-card__header">
+              <h2>Adresses</h2>
+            </header>
+
+            <div class="account-card__body">
+              <p class="account-card__subtitle">Adresse par défaut :</p>
+              <p class="account-card__text">
+                {{ currentUser.fullName || currentUser.name }}
+              </p>
+              <p class="account-card__text">
+                {{ currentUser.address || 'Aucune adresse enregistrée' }}
+              </p>
+              <p class="account-card__text" *ngIf="currentUser.city || currentUser.district">
+                {{ currentUser.city }} - {{ currentUser.district }}
+              </p>
+              <p class="account-card__text" *ngIf="currentUser.phone">
+                {{ currentUser.phone }}
+              </p>
+            </div>
+
+            <footer class="account-card__footer">
+              <button type="button" class="link-btn" (click)="toggleEditAddress()">
+                Modifier l’adresse
+              </button>
+            </footer>
+
+            <!-- Formulaire adresse -->
+            <form
+              *ngIf="editingAddress"
+              [formGroup]="addressForm"
+              (ngSubmit)="onSubmitAddress()"
+              class="account-form"
+              novalidate
+            >
+              <div class="form-group">
+                <label>Adresse</label>
+                <input type="text" formControlName="address" />
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Ville</label>
+                  <input type="text" formControlName="city" />
+                </div>
+                <div class="form-group">
+                  <label>Quartier</label>
+                  <input type="text" formControlName="district" />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                class="btn-primary"
+                [disabled]="addressForm.invalid"
+              >
+                Enregistrer l’adresse
+              </button>
+            </form>
+          </article>
+
+          <!-- Préférences de communication -->
+          <article class="account-card">
+            <header class="account-card__header">
+              <h2>Préférences de communication</h2>
+            </header>
+
+            <div class="account-card__body">
+              <p class="account-card__text">
+                Gérez vos communications par e‑mail pour rester informé des
+                dernières nouvelles et offres.
+              </p>
+            </div>
+
+            <footer class="account-card__footer">
+              <button type="button" class="link-btn">
+                Modifier les préférences de communication
+              </button>
+            </footer>
+          </article>
+        </div>
+      </div>
+    </div>
+
+<!-- SECTIONS RECOMMANDATIONS : on réutilise la HOME -->
+<div class="account-recos-wrapper">
+  <section class="account-recos">
+    <h2 class="account-recos__title">Produits recommandés pour vous</h2>
+    <p class="account-recos__subtitle">
+      Quelques articles populaires de Saty Boutique.
+    </p>
+
+    <div class="account-recos__grid">
+      <!-- Produit 1 -->
+      <article class="home-product-card">
+        <div class="home-product-card__image-wrapper">
+          <img
+            src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80"
+            alt="Chemise moderne"
+            class="home-product-card__image"
+          />
+          <div class="home-product-card__overlay">
+            <button
+              class="home-product-card__icon-btn home-product-card__icon-btn--heart"
+              [class.home-product-card__icon-btn--favorite]="favoritesService.isFavorite('p1')"
+              (click)="toggleFavorite({
+                id: 'p1',
+                name: 'Chemise moderne',
+                price: 25000,
+                image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80',
+                categorySlug: 'chemises'
+              }); $event.stopPropagation()"
+              title="Ajouter aux favoris"
+            >
+              ❤️
+            </button>
+            <button
+              class="home-product-card__icon-btn"
+              (click)="addToCartFromRecommendations({
+                id: 'p1',
+                name: 'Chemise moderne',
+                price: 25000,
+                image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80'
+              }); $event.stopPropagation()"
+            >
+              <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
+            </button>
+            <button
+              class="home-product-card__icon-btn"
+              (click)="goToProduct('p1'); $event.stopPropagation()"
+            >
+              <img src="assets/icons/oeil.svg" alt="Voir les détails" />
+            </button>
+          </div>
+        </div>
+        <h3 class="home-product-card__name">Chemise moderne</h3>
+        <p class="home-product-card__price">25 000 FCFA</p>
+      </article>
+
+      <!-- Produit 2 -->
+      <article class="home-product-card">
+        <div class="home-product-card__image-wrapper">
+          <img
+            src="https://images.unsplash.com/photo-1514996937319-344454492b37?auto=format&fit=crop&w=900&q=80"
+            alt="Robe africaine élégante"
+            class="home-product-card__image"
+          />
+          <div class="home-product-card__overlay">
+            <button
+              class="home-product-card__icon-btn home-product-card__icon-btn--heart"
+              [class.home-product-card__icon-btn--favorite]="favoritesService.isFavorite('p2')"
+              (click)="toggleFavorite({
+                id: 'p2',
+                name: 'Robe africaine élégante',
+                price: 35000,
+                image: 'https://images.unsplash.com/photo-1514996937319-344454492b37?auto=format&fit=crop&w=900&q=80',
+                categorySlug: 'robes'
+              }); $event.stopPropagation()"
+              title="Ajouter aux favoris"
+            >
+              ❤️
+            </button>
+            <button
+              class="home-product-card__icon-btn"
+              (click)="addToCartFromRecommendations({
+                id: 'p2',
+                name: 'Robe africaine élégante',
+                price: 35000,
+                image: 'https://images.unsplash.com/photo-1514996937319-344454492b37?auto=format&fit=crop&w=900&q=80'
+              }); $event.stopPropagation()"
+            >
+              <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
+            </button>
+            <button
+              class="home-product-card__icon-btn"
+              (click)="goToProduct('p2'); $event.stopPropagation()"
+            >
+              <img src="assets/icons/oeil.svg" alt="Voir les détails" />
+            </button>
+          </div>
+        </div>
+        <h3 class="home-product-card__name">Robe africaine élégante</h3>
+        <p class="home-product-card__price">35 000 FCFA</p>
+      </article>
+
+      <!-- Produit 3 -->
+      <article class="home-product-card">
+        <div class="home-product-card__image-wrapper">
+          <img
+            src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=900&q=80"
+            alt="Ensemble pagne"
+            class="home-product-card__image"
+          />
+          <div class="home-product-card__overlay">
+            <button
+              class="home-product-card__icon-btn home-product-card__icon-btn--heart"
+              [class.home-product-card__icon-btn--favorite]="favoritesService.isFavorite('p3')"
+              (click)="toggleFavorite({
+                id: 'p3',
+                name: 'Ensemble pagne',
+                price: 40000,
+                image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=900&q=80',
+                categorySlug: 'ensembles'
+              }); $event.stopPropagation()"
+              title="Ajouter aux favoris"
+            >
+              ❤️
+            </button>
+            <button
+              class="home-product-card__icon-btn"
+              (click)="addToCartFromRecommendations({
+                id: 'p3',
+                name: 'Ensemble pagne',
+                price: 40000,
+                image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=900&q=80'
+              }); $event.stopPropagation()"
+            >
+              <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
+            </button>
+            <button
+              class="home-product-card__icon-btn"
+              (click)="goToProduct('p3'); $event.stopPropagation()"
+            >
+              <img src="assets/icons/oeil.svg" alt="Voir les détails" />
+            </button>
+          </div>
+        </div>
+        <h3 class="home-product-card__name">Ensemble pagne</h3>
+        <p class="home-product-card__price">40 000 FCFA</p>
+      </article>
+    </div>
+  </section>
+</div>
+  </section>

@@ -1,0 +1,262 @@
+<!-- details-produit.component.html -->
+<div class="details" *ngIf="product as p; else loading">
+  <!-- 🎨 GALERIE D'IMAGES GAUCHE -->
+  <div class="details__gallery">
+    <!-- Image principale avec zoom -->
+    <div class="gallery-main" [class.gallery-main--zoomed]="isZoomed">
+      <img
+        [src]="selectedImage"
+        [alt]="p.name"
+        class="gallery-main__image"
+        (click)="toggleZoom()"
+      />
+
+      <!-- Boutons navigation -->
+      <button
+        type="button"
+        class="gallery-nav gallery-nav--prev"
+        (click)="prevImage(); $event.stopPropagation()"
+        *ngIf="p.images.length > 1"
+      >
+        ‹
+      </button>
+      <button
+        type="button"
+        class="gallery-nav gallery-nav--next"
+        (click)="nextImage(); $event.stopPropagation()"
+        *ngIf="p.images.length > 1"
+      >
+        ›
+      </button>
+
+      <!-- Indicateur de zoom -->
+      <div class="gallery-zoom-hint" *ngIf="!isZoomed">
+        <span>🔍 Cliquer pour zoomer</span>
+      </div>
+
+      <!-- Badge promo -->
+      <div class="gallery-badge" *ngIf="p.oldPrice">
+        -{{ ((p.oldPrice - p.price) / p.oldPrice * 100).toFixed(0) }}%
+      </div>
+    </div>
+
+    <!-- Thumbnails -->
+    <div class="gallery-thumbnails" *ngIf="p.images.length > 1">
+      <button
+        type="button"
+        class="thumbnail"
+        *ngFor="let img of p.images; let i = index"
+        [class.thumbnail--active]="i === currentImageIndex"
+        (click)="selectImage(i)"
+      >
+        <img [src]="img" [alt]="'Vue ' + (i + 1)" />
+      </button>
+    </div>
+  </div>
+
+  <!-- 📄 INFORMATIONS PRODUIT DROITE -->
+  <div class="details__info">
+    <!-- Badge stock -->
+    <div class="details__stock" *ngIf="p.stock !== undefined">
+      <span class="stock-badge" [class.stock-badge--low]="p.stock < 10">
+        {{ p.stock > 0 ? p.stock + ' en stock' : 'Rupture de stock' }}
+      </span>
+    </div>
+
+    <!-- Marque -->
+    <p class="details__brand">{{ p.brand }}</p>
+
+    <!-- Titre -->
+    <h1 class="details__title">{{ p.name }}</h1>
+
+    <!-- Avis et notation -->
+    <div class="details__rating" *ngIf="p.rating">
+      <div class="rating-stars">
+        <span
+          *ngFor="let star of getStars(p.rating)"
+          [class.star--filled]="star === 1"
+        >
+          ★
+        </span>
+        <span class="rating-value">{{ p.rating }}</span>
+      </div>
+      <span class="rating-reviews" *ngIf="p.reviews">
+        ({{ p.reviews }} avis)
+      </span>
+    </div>
+
+    <!-- Prix -->
+    <div class="details__prices">
+      <span class="details__old-price" *ngIf="p.oldPrice">
+        {{ p.oldPrice | number }} FCFA
+      </span>
+      <span class="details__price">{{ p.price | number }} FCFA</span>
+      <span class="details__saving" *ngIf="p.oldPrice">
+        Vous économisez {{ (p.oldPrice - p.price) | number }} FCFA
+      </span>
+    </div>
+
+    <!-- Description -->
+    <p class="details__description">{{ p.description }}</p>
+
+    <!-- Caractéristiques -->
+    <div class="details__features" *ngIf="p.features && p.features.length">
+      <h3 class="details__features-title">Caractéristiques :</h3>
+      <ul class="features-list">
+        <li *ngFor="let feature of p.features">
+          <span class="feature-icon">✓</span>
+          {{ feature }}
+        </li>
+      </ul>
+    </div>
+
+    <!-- Options (taille / couleur) -->
+    <div class="details__options">
+      <!-- Taille -->
+      <div class="details__option" *ngIf="p.sizes?.length">
+        <label class="details__option-label">
+          Taille :
+          <span class="selected-value">{{ selectedSize }}</span>
+        </label>
+        <div class="details__chips">
+          <button
+            type="button"
+            *ngFor="let size of p.sizes"
+            class="details__chip"
+            [class.details__chip--active]="size === selectedSize"
+            (click)="changeSize(size)"
+          >
+            {{ size }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Couleur -->
+      <div class="details__option" *ngIf="p.colors?.length">
+        <label class="details__option-label">
+          Couleur :
+          <span class="selected-value">{{ selectedColor }}</span>
+        </label>
+        <div class="details__chips">
+          <button
+            type="button"
+            *ngFor="let color of p.colors"
+            class="details__chip"
+            [class.details__chip--active]="color === selectedColor"
+            (click)="changeColor(color)"
+          >
+            {{ color }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions panier / favoris -->
+    <div class="details__actions">
+      <!-- Si l'article N'EST PAS dans le panier -->
+      <ng-container *ngIf="currentQuantity === null; else inCartBlock">
+        <button
+          type="button"
+          class="details__btn-cart"
+          (click)="addToCart()"
+          [disabled]="p.stock === 0"
+        >
+          <span *ngIf="p.stock === 0">Rupture de stock</span>
+          <span *ngIf="p.stock !== 0">Ajouter au panier</span>
+        </button>
+
+        <button
+          type="button"
+          class="details__btn-fav"
+          [class.details__btn-fav--active]="isFavorite"
+          (click)="toggleFavorite()"
+          aria-label="Ajouter aux favoris"
+        >
+          ♥
+        </button>
+      </ng-container>
+
+      <!-- Si l'article est déjà dans le panier -->
+      <ng-template #inCartBlock>
+        <div class="details__in-cart">
+          <span class="details__in-cart-label">Déjà dans votre panier</span>
+
+          <div class="details__qty-controls">
+            <button
+              type="button"
+              (click)="changeCartQuantity(-1)"
+              [disabled]="(currentQuantity ?? 0) <= 1"
+            >
+              −
+            </button>
+            <span>{{ currentQuantity }}</span>
+            <button type="button" (click)="changeCartQuantity(1)">+</button>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="details__btn-fav"
+          [class.details__btn-fav--active]="isFavorite"
+          (click)="toggleFavorite()"
+          aria-label="Ajouter aux favoris"
+        >
+          ♥
+        </button>
+      </ng-template>
+    </div>
+
+    <!-- Informations livraison -->
+
+  </div>
+</div>
+
+<ng-template #loading>
+  <div class="details__loading">
+    <div class="loading-spinner"></div>
+    <p>Chargement du produit...</p>
+  </div>
+</ng-template>
+
+<!-- PARTIE SUGGESTIONS DES PRODUITS -->
+<section
+  class="details-suggestions"
+  *ngIf="suggestedProducts && suggestedProducts.length"
+>
+  <h2 class="details-suggestions__title">Vous pourriez aussi aimer</h2>
+
+  <div class="details-suggestions__grid">
+    <article class="suggest-card" *ngFor="let sp of suggestedProducts">
+      <div class="suggest-card__image-wrapper">
+        <img
+          [src]="sp.images[0]"
+          [alt]="sp.name"
+          class="suggest-card__image"
+        />
+
+        <!-- overlay actions au hover -->
+        <div class="suggest-card__overlay">
+          <button
+            type="button"
+            class="suggest-card__icon-btn"
+            (click)="addSuggestedToCart(sp); $event.stopPropagation()"
+          >
+            <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
+          </button>
+          <button
+            type="button"
+            class="suggest-card__icon-btn"
+            (click)="goToProduct(sp.id); $event.stopPropagation()"
+          >
+            <img src="assets/icons/oeil.svg" alt="Voir les détails" />
+          </button>
+        </div>
+      </div>
+
+      <div class="suggest-card__body">
+        <h3 class="suggest-card__name">{{ sp.name }}</h3>
+        <p class="suggest-card__price">{{ sp.price | number }} FCFA</p>
+      </div>
+    </article>
+  </div>
+</section>

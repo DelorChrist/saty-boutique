@@ -1,0 +1,161 @@
+<main class="auth-wrapper">
+  <div class="auth-hero">
+    <!-- Image à gauche -->
+    <div class="auth-image">
+      <img src="assets/images/connexion.jpg" alt="SatyBoutique" />
+    </div>
+
+    <!-- Bloc blanc à droite -->
+    <section class="auth-panel">
+      <header class="auth-header">
+        
+        <!-- Titres -->
+        <h1 class="auth-heading" *ngIf="view === 'login'">
+          Bon retour chez<br />
+          Saty Boutique.
+        </h1>
+        <h1 class="auth-heading" *ngIf="view === 'signup'">
+          Bienvenue chez<br />
+          Saty Boutique.
+        </h1>
+
+        <!-- Sous-titres -->
+        <p class="auth-subheading" *ngIf="view === 'login'">
+          Continuez vos achats en toute sécurité.
+        </p>
+        <p class="auth-subheading" *ngIf="view === 'signup'">
+          Nous sommes ravis de vous compter parmi nos nouveaux clients.
+        </p>
+
+        <!-- Onglets Se connecter / Créer un compte -->
+        <nav class="auth-tabs">
+          <a
+            href="javascript:void(0)"
+            [class.auth-tab--active]="view === 'login'"
+            (click)="switchView('login')"
+          >
+            Se connecter
+          </a>
+          <a
+            href="javascript:void(0)"
+            [class.auth-tab--active]="view === 'signup'"
+            (click)="switchView('signup')"
+          >
+            Créer un compte
+          </a>
+        </nav>
+      </header>
+
+      <!-- Formulaire CONNEXION -->
+      <form
+        *ngIf="view === 'login'"
+        class="auth-form"
+        (ngSubmit)="onSubmitLogin()"
+      >
+        <div class="auth-field">
+          <input
+            type="email"
+            name="loginEmail"
+            [(ngModel)]="loginEmail"
+            required
+            placeholder="Email"
+          />
+        </div>
+
+        <div class="auth-field">
+          <input
+            type="password"
+            name="loginPassword"
+            [(ngModel)]="loginPassword"
+            required
+            placeholder="Mot de passe"
+          />
+        </div>
+
+        <button type="submit" class="auth-primary-btn">
+          Se connecter
+        </button>
+
+        <div class="auth-or">
+          <span></span>
+          <p>ou se connecter avec</p>
+          <span></span>
+        </div>
+
+        <div class="auth-social-row">
+          <button type="button" class="social-btn social-btn--google">
+            <img src="assets/icons/google.svg" alt="Google" />
+            <span>Google</span>
+          </button>
+          <button type="button" class="social-btn social-btn--facebook">
+            <img src="assets/icons/facebook.svg" alt="Facebook" />
+            <span>Facebook</span>
+          </button>
+        </div>
+      </form>
+
+      <!-- Formulaire CREER UN COMPTE -->
+      <form
+        *ngIf="view === 'signup'"
+        class="auth-form"
+        (ngSubmit)="onSubmitSignup()"
+      >
+        <div class="auth-field">
+          <input
+            type="text"
+            name="signupName"
+            [(ngModel)]="signupName"
+            required
+            placeholder="Nom et prénom"
+          />
+        </div>
+
+        <div class="auth-field">
+          <input
+            type="email"
+            name="signupEmail"
+            [(ngModel)]="signupEmail"
+            required
+            placeholder="Adresse email"
+          />
+        </div>
+
+        <!-- Téléphone + MDP + Confirmation sur la même ligne -->
+        <div class="auth-field auth-field--row">
+          <input
+            type="tel"
+            name="signupNumber"
+            [(ngModel)]="signupNumber"
+            required
+            placeholder="Téléphone"
+          />
+          <input
+            type="password"
+            name="signupPassword"
+            [(ngModel)]="signupPassword"
+            required
+            minlength="6"
+            placeholder="Mot de passe"
+          />
+          <input
+            type="password"
+            name="signupConfirm"
+            [(ngModel)]="signupConfirm"
+            required
+            minlength="6"
+            placeholder="Confirmation"
+          />
+        </div>
+
+        <button type="submit" class="auth-primary-btn">
+          Créer un compte
+        </button>
+
+        <p class="auth-legal">
+          En créant un compte, vous acceptez les
+          <a href="#">conditions d'utilisation</a>.
+        </p>
+      </form>
+    </section>
+  </div>
+</main>

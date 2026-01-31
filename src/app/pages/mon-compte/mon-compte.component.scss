@@ -1,0 +1,448 @@
+.account-page {
+  max-width: 1120px;
+  margin: 1.5rem auto;
+  padding: 0 1rem 2rem;
+  background: #f5f5f5;
+}
+
+.account-title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.account-layout {
+  display: grid;
+  grid-template-columns: 0.25fr 0.75fr;
+  gap: 1.5rem;
+}
+
+/* Sidebar */
+
+.account-sidebar {
+  background: #ffffff;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+  padding: 0.75rem 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.account-sidebar__header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 1rem 0.7rem;
+  background: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.account-sidebar__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e0e0e0;
+}
+
+.account-sidebar__title {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.account-sidebar__name {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.account-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.account-sidebar__nav button {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  font-size: 0.9rem;
+  padding: 0.45rem 1rem;
+  cursor: pointer;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  position: relative;
+}
+
+/* Barre colorée à gauche + fond léger au hover */
+.account-sidebar__nav button::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: transparent;
+}
+
+.account-sidebar__nav button:hover {
+  background: #f9f9f9;
+  color: #e53935;
+}
+
+.account-sidebar__nav button:hover::before {
+  background: #e53935;
+}
+
+.account-sidebar__section {
+  padding: 0.5rem 0 0.4rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.account-sidebar__section-title {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: #999;
+  margin: 0 1rem 0.3rem;
+}
+
+.account-sidebar__link {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  font-size: 0.9rem;
+  padding: 0.4rem 1rem;
+  cursor: pointer;
+  color: #333;
+  position: relative;
+}
+
+.account-sidebar__link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: transparent;
+}
+
+.account-sidebar__link:hover {
+  background: #f9f9f9;
+  color: #e53935;
+}
+
+.account-sidebar__link:hover::before {
+  background: #e53935;
+}
+
+.account-sidebar__link.is-active {
+  color: #e53935;
+  font-weight: 600;
+  background: #fff7f7;
+}
+
+.account-sidebar__link.is-active::before {
+  background: #e53935;
+}
+
+.account-sidebar__logout {
+  margin-top: 0.5rem;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: #e67e22;
+  font-weight: 600;
+  padding: 0.6rem 1rem 0.8rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.account-sidebar__logout:hover {
+  background: #fff7f0;
+}
+
+/* Colonne droite */
+
+.account-main__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.1fr);
+  gap: 1rem;
+}
+
+.account-card {
+  background: #ffffff;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.account-card__header h2 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.account-card__body {
+  font-size: 0.9rem;
+}
+
+.account-card__name {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.account-card__subtitle {
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+}
+
+.account-card__text {
+  margin: 0.1rem 0;
+}
+
+.account-card__footer {
+  margin-top: 0.5rem;
+}
+
+.link-btn {
+  border: none;
+  background: transparent;
+  color: #f57c00;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.link-btn:hover {
+  text-decoration: underline;
+}
+
+/* Formulaires */
+
+.account-form {
+  margin-top: 0.6rem;
+  border-top: 1px solid #f5f5f5;
+  padding-top: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+label {
+  font-size: 0.8rem;
+}
+
+input {
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-size: 0.9rem;
+}
+
+input:focus {
+  outline: none;
+  border-color: #e53935;
+}
+
+.btn-primary {
+  align-self: flex-start;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: none;
+  background: #e53935;
+  color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.05);
+}
+
+/* Recos en dessous */
+
+.account-recos-wrapper {
+  margin-top: 2rem;
+}
+
+    /* ----- Recommandations sous le compte ----- */
+
+.account-recos-wrapper {
+  margin-top: 2rem;
+}
+
+.account-recos {
+  background: #ffffff;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+  padding: 1rem 1.2rem 1.2rem;
+}
+
+.account-recos__title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.account-recos__subtitle {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 0.9rem;
+}
+
+/* grille produits */
+
+.account-recos__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+/* cartes */
+
+.account-recos .home-product-card {
+  background: #fff;
+  border-radius: 4px;
+  border: 1px solid #eee;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.account-recos .home-product-card:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+/* image + overlay centré */
+
+.account-recos .home-product-card__image-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.account-recos .home-product-card__image {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+  max-height: 180px;
+}
+
+/* overlay centré au milieu de l'image */
+.account-recos .home-product-card__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;           /* centre verticalement */
+  justify-content: center;       /* centre horizontalement */
+  gap: 0.4rem;
+  opacity: 0;
+  background: radial-gradient(
+    circle at center,
+    rgba(0, 0, 0, 0.18) 0,
+    rgba(0, 0, 0, 0.35) 60%,
+    rgba(0, 0, 0, 0.5) 100%
+  );
+  transition: opacity 0.18s ease;
+}
+
+.account-recos .home-product-card:hover .home-product-card__overlay {
+  opacity: 1;
+}
+
+/* icônes */
+
+.account-recos .home-product-card__icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.92);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.account-recos .home-product-card__icon-btn img {
+  width: 18px;
+  height: 18px;
+}
+
+.account-recos .home-product-card__icon-btn--heart {
+  font-size: 16px;
+}
+
+.account-recos .home-product-card__icon-btn--favorite {
+  background: #ffecec;
+}
+
+/* hover chic sur les icônes */
+.account-recos .home-product-card__icon-btn:hover {
+  transform: scale(1.07);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+/* texte */
+
+.account-recos .home-product-card__name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.45rem 0.5rem 0.1rem;
+}
+
+.account-recos .home-product-card__price {
+  font-size: 0.85rem;
+  color: #e53935;
+  padding: 0 0.5rem 0.6rem;
+}
+
+/* responsive */
+
+@media (max-width: 900px) {
+  .account-recos__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .account-recos__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Responsive */
+
+@media (max-width: 900px) {
+  .account-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .account-main__grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,127 @@
+<!-- panier.component.html -->
+<div class="panier">
+  <div class="panier__header">
+    <h1 class="panier__title">Mon Panier</h1>
+    <p class="panier__count">{{ items.length }} article(s)</p>
+  </div>
+
+  <!-- Panier vide -->
+  <div class="panier__empty" *ngIf="items.length === 0">
+    <div class="panier__empty-icon"></div>
+    <h2 class="panier__empty-title">Votre panier est vide</h2>
+    <p class="panier__empty-text">
+      Découvrez nos produits et ajoutez vos articles préférés.
+    </p>
+    <button class="btn btn--primary" (click)="continueShopping()">
+      Découvrir nos produits
+    </button>
+  </div>
+
+  <!-- Panier avec articles -->
+  <div class="panier__content" *ngIf="items.length > 0">
+    <div class="panier__items">
+      <article class="cart-item" *ngFor="let item of items; let i = index">
+        <!-- Image cliquable vers détails -->
+        <div class="cart-item__image" (click)="goToProduct(item.productId)">
+          <img [src]="item.image" [alt]="item.name" />
+        </div>
+
+        <!-- Infos cliquables vers détails -->
+        <div class="cart-item__info" (click)="goToProduct(item.productId)">
+          <h3 class="cart-item__name">{{ item.name }}</h3>
+          <p class="cart-item__meta" *ngIf="item.size">
+            Taille : <span>{{ item.size }}</span>
+          </p>
+          <p class="cart-item__meta" *ngIf="item.color">
+            Couleur : <span>{{ item.color }}</span>
+          </p>
+          <p class="cart-item__price">{{ item.price | number }} FCFA</p>
+        </div>
+
+        <!-- Quantité -->
+        <div class="cart-item__quantity">
+          <button
+            type="button"
+            class="cart-item__qty-btn"
+            (click)="decreaseQuantity(i); $event.stopPropagation()"
+            [disabled]="item.quantity <= 1"
+          >
+            −
+          </button>
+          <span class="cart-item__qty">{{ item.quantity }}</span>
+          <button
+            type="button"
+            class="cart-item__qty-btn"
+            (click)="increaseQuantity(i); $event.stopPropagation()"
+          >
+            +
+          </button>
+        </div>
+
+        <!-- Total ligne -->
+        <div class="cart-item__total">
+          <p class="cart-item__total-price">
+            {{ item.price * item.quantity | number }} FCFA
+          </p>
+        </div>
+
+        <!-- Supprimer -->
+        <button
+          type="button"
+          class="cart-item__remove"
+          (click)="removeItem(i); $event.stopPropagation()"
+          aria-label="Retirer l'article"
+        >
+          ✕
+        </button>
+      </article>
+    </div>
+
+    <!-- Résumé -->
+    <div class="panier__summary">
+      <h2 class="panier__summary-title">Résumé de la commande</h2>
+
+      <div class="panier__summary-row">
+        <span>Sous-total</span>
+        <span>{{ cartService.getTotalPrice() | number }} FCFA</span>
+      </div>
+
+      <div class="panier__summary-row">
+        <span>Livraison</span>
+        <span>Gratuite</span>
+      </div>
+
+      <div class="panier__summary-divider"></div>
+
+      <div class="panier__summary-row panier__summary-row--total">
+        <span>Total</span>
+        <span>{{ cartService.getTotalPrice() | number }} FCFA</span>
+      </div>
+
+      <button
+        type="button"
+        class="panier__checkout-btn"
+        (click)="proceedToCheckout()
+        "
+      >
+        Passer la commande
+      </button>
+
+      <button
+        type="button"
+        class="panier__continue-btn"
+        (click)="continueShopping()"
+      >
+        Continuer mes achats
+      </button>
+
+      <button
+        type="button"
+        class="panier__clear-btn"
+        (click)="clearCart()"
+      >
+        Vider le panier
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,150 @@
+<div class="produits">
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb">
+    <a routerLink="/">Accueil</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">Tous les produits</span>
+  </nav>
+
+  <!-- Header -->
+  <header class="produits__header">
+    <h1 class="produits__title">Tous nos produits</h1>
+    <p class="produits__description">
+      Découvrez l'intégralité de notre catalogue de tenues africaines modernes.
+    </p>
+    <p class="produits__count">{{ filteredProducts.length }} article(s)</p>
+  </header>
+
+  <!-- Filtres catégorie -->
+  <div class="produits__category-filters">
+    <button
+      type="button"
+      class="category-btn"
+      *ngFor="let cat of categories"
+      [class.category-btn--active]="selectedCategory === cat.slug"
+      (click)="filterByCategory(cat.slug)"
+    >
+      {{ cat.name }}
+    </button>
+  </div>
+
+  <!-- Filtres & Tri -->
+  <div class="produits__filters">
+    <span class="produits__filters-label">Trier par :</span>
+    <button
+      type="button"
+      class="filter-btn"
+      [class.filter-btn--active]="activeSortType === 'default'"
+      (click)="sortBy('default')"
+    >
+      Par défaut
+    </button>
+    <button
+      type="button"
+      class="filter-btn"
+      [class.filter-btn--active]="activeSortType === 'price-asc'"
+      (click)="sortBy('price-asc')"
+    >
+      Prix croissant
+    </button>
+    <button
+      type="button"
+      class="filter-btn"
+      [class.filter-btn--active]="activeSortType === 'price-desc'"
+      (click)="sortBy('price-desc')"
+    >
+      Prix décroissant
+    </button>
+    <button
+      type="button"
+      class="filter-btn"
+      [class.filter-btn--active]="activeSortType === 'name-asc'"
+      (click)="sortBy('name-asc')"
+    >
+      Nom A-Z
+    </button>
+  </div>
+
+  <!-- Message si aucun produit -->
+  <div class="produits__empty" *ngIf="filteredProducts.length === 0">
+    <div class="produits__empty-icon">📦</div>
+    <h2>Aucun produit trouvé</h2>
+    <p>Aucun produit ne correspond à vos critères de recherche.</p>
+    <button class="btn btn--primary" (click)="filterByCategory('all')">
+      Voir tous les produits
+    </button>
+  </div>
+
+  <!-- Grille produits -->
+  <section class="produits__grid" *ngIf="displayedProducts.length > 0">
+    <article
+      class="product-card"
+      *ngFor="let product of displayedProducts"
+    >
+      <div class="product-card__image-wrapper">
+        <span class="product-card__badge" *ngIf="product.isNew">Nouveau</span>
+        <img
+          [src]="product.image"
+          [alt]="product.name"
+          class="product-card__image"
+        />
+
+        <!-- Overlay avec panier + œil -->
+        <div class="product-card__overlay">
+          <button
+            type="button"
+            class="product-card__icon-btn"
+            (click)="addToCart(product); $event.stopPropagation()"
+            title="Ajouter au panier"
+          >
+            <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
+          </button>
+          <button
+            type="button"
+            class="product-card__icon-btn"
+            (click)="goToProduct(product.id); $event.stopPropagation()"
+            title="Voir les détails"
+          >
+            <img src="assets/icons/oeil.svg" alt="Voir les détails" />
+          </button>
+        </div>
+      </div>
+
+      <h3 class="product-card__name">{{ product.name }}</h3>
+      <p class="product-card__price">{{ product.price | number }} FCFA</p>
+    </article>
+  </section>
+
+  <!-- Pagination -->
+  <nav class="pagination" *ngIf="totalPages > 1">
+    <button
+      type="button"
+      class="pagination__btn pagination__btn--prev"
+      [disabled]="currentPage === 1"
+      (click)="goToPage(currentPage - 1)"
+    >
+      ← Précédent
+    </button>
+
+    <div class="pagination__numbers">
+      <button
+        type="button"
+        class="pagination__number"
+        *ngFor="let page of pages"
+        [class.pagination__number--active]="page === currentPage"
+        (click)="goToPage(page)"
+      >
+        {{ page }}
+      </button>
+    </div>
+
+    <button
+      type="button"
+      class="pagination__btn pagination__btn--next"
+      [disabled]="currentPage === totalPages"
+      (click)="goToPage(currentPage + 1)"
+    >
+      Suivant →
+    </button>
+  </nav>
+</div>

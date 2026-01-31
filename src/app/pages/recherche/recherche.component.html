@@ -1,0 +1,200 @@
+<div class="recherche">
+  <!-- Header recherche -->
+  <div class="recherche__header">
+    <h1 class="recherche__title">Résultats de recherche</h1>
+    <p class="recherche__count" *ngIf="searchQuery">
+      {{ filteredProducts.length }} résultat(s) pour "{{ searchQuery }}"
+    </p>
+  </div>
+
+  <div class="recherche__content">
+    <!-- Sidebar filtres -->
+    <aside class="recherche__filters">
+      <div class="filter-section">
+        <h3 class="filter-section__title">Catégories</h3>
+        <div class="filter-section__content">
+          <label
+            class="filter-checkbox"
+            *ngFor="let cat of categories"
+          >
+            <input
+              type="radio"
+              name="category"
+              [value]="cat.slug"
+              [(ngModel)]="selectedCategory"
+              (change)="onCategoryChange(cat.slug)"
+            />
+            <span>{{ cat.name }}</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <h3 class="filter-section__title">Prix</h3>
+        <div class="filter-section__content">
+          <div class="price-inputs">
+            <input
+              type="number"
+              placeholder="Min"
+              [(ngModel)]="priceRange.min"
+              (ngModelChange)="onPriceChange()"
+              class="price-input"
+            />
+            <span>—</span>
+            <input
+              type="number"
+              placeholder="Max"
+              [(ngModel)]="priceRange.max"
+              (ngModelChange)="onPriceChange()"
+              class="price-input"
+            />
+          </div>
+
+          <div class="price-range">
+            <input
+              type="range"
+              [min]="minPrice"
+              [max]="maxPrice"
+              [(ngModel)]="priceRange.min"
+              (ngModelChange)="onPriceChange()"
+              class="price-slider"
+            />
+            <input
+              type="range"
+              [min]="minPrice"
+              [max]="maxPrice"
+              [(ngModel)]="priceRange.max"
+              (ngModelChange)="onPriceChange()"
+              class="price-slider"
+            />
+          </div>
+
+          <p class="price-display">
+            {{ priceRange.min | number }} FCFA - {{ priceRange.max | number }} FCFA
+          </p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="filter-clear-btn"
+        (click)="clearFilters()"
+      >
+        Réinitialiser les filtres
+      </button>
+    </aside>
+
+    <!-- Zone résultats -->
+    <main class="recherche__results">
+      <!-- Tri -->
+      <div class="recherche__sort">
+        <span class="recherche__sort-label">Trier par :</span>
+        <button
+          type="button"
+          class="sort-btn"
+          [class.sort-btn--active]="activeSortType === 'relevance'"
+          (click)="sortBy('relevance')"
+        >
+          Pertinence
+        </button>
+        <button
+          type="button"
+          class="sort-btn"
+          [class.sort-btn--active]="activeSortType === 'price-asc'"
+          (click)="sortBy('price-asc')"
+        >
+          Prix croissant
+        </button>
+        <button
+          type="button"
+          class="sort-btn"
+          [class.sort-btn--active]="activeSortType === 'price-desc'"
+          (click)="sortBy('price-desc')"
+        >
+          Prix décroissant
+        </button>
+        <button
+          type="button"
+          class="sort-btn"
+          [class.sort-btn--active]="activeSortType === 'name-asc'"
+          (click)="sortBy('name-asc')"
+        >
+          Nom A-Z
+        </button>
+      </div>
+
+      <!-- Message vide -->
+      <div class="recherche__empty" *ngIf="filteredProducts.length === 0">
+        <div class="recherche__empty-icon">🔍</div>
+        <h2>Aucun résultat trouvé</h2>
+        <p *ngIf="searchQuery">
+          Aucun produit ne correspond à votre recherche "{{ searchQuery }}".
+        </p>
+        <p *ngIf="!searchQuery">
+          Effectuez une recherche pour trouver vos articles préférés.
+        </p>
+        <button class="btn btn--primary" (click)="clearFilters()">
+          Réinitialiser
+        </button>
+      </div>
+
+      <!-- Grille produits -->
+      <div class="recherche__grid" *ngIf="filteredProducts.length > 0">
+        <article
+          class="product-card"
+          *ngFor="let product of filteredProducts"
+        >
+          <div class="product-card__image-wrapper">
+            <span class="product-card__badge" *ngIf="product.isNew">
+              Nouveau
+            </span>
+            <img
+              [src]="product.image"
+              [alt]="product.name"
+              class="product-card__image"
+              (click)="goToProduct(product.id)"
+            />
+
+            <!-- Overlay actions -->
+            <div class="product-card__overlay">
+              <button
+                type="button"
+                class="product-card__icon-btn product-card__icon-btn--heart"
+                [class.product-card__icon-btn--favorite]="
+                  favoritesService.isFavorite(product.id)
+                "
+                (click)="toggleFavorite(product); $event.stopPropagation()"
+                title="Ajouter aux favoris"
+              >
+                ❤️
+              </button>
+
+              <button
+                type="button"
+                class="product-card__icon-btn"
+                (click)="addToCart(product); $event.stopPropagation()"
+                title="Ajouter au panier"
+              >
+                <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
+              </button>
+
+              <button
+                type="button"
+                class="product-card__icon-btn"
+                (click)="goToProduct(product.id); $event.stopPropagation()"
+                title="Voir les détails"
+              >
+                <img src="assets/icons/oeil.svg" alt="Voir les détails" />
+              </button>
+            </div>
+          </div>
+
+          <h3 class="product-card__name" (click)="goToProduct(product.id)">
+            {{ product.name }}
+          </h3>
+          <p class="product-card__price">{{ product.price | number }} FCFA</p>
+        </article>
+      </div>
+    </main>
+  </div>
+</div>

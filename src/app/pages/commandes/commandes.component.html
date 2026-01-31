@@ -1,0 +1,229 @@
+<div class="commandes-page">
+  <!-- En-tête avec statistiques -->
+  <div class="page-header">
+    <div class="page-header__content">
+      <h1 class="page-title">Mes commandes</h1>
+      <p class="page-subtitle">
+        {{ stats.total }} commande{{ stats.total > 1 ? 's' : '' }} •
+        {{ formatPrice(stats.totalSpent) }} FCFA dépensés
+      </p>
+    </div>
+  </div>
+
+  <!-- Cartes de statistiques -->
+  <div class="stats-cards">
+    <div class="stat-card stat-card--orange" *ngIf="stats.pending > 0">
+      <div class="stat-card__icon">⏳</div>
+      <div class="stat-card__content">
+        <p class="stat-card__value">{{ stats.pending }}</p>
+        <p class="stat-card__label">En attente</p>
+      </div>
+    </div>
+
+    <div class="stat-card stat-card--purple" *ngIf="stats.processing > 0">
+      <div class="stat-card__icon">📦</div>
+      <div class="stat-card__content">
+        <p class="stat-card__value">{{ stats.processing }}</p>
+        <p class="stat-card__label">En préparation</p>
+      </div>
+    </div>
+
+    <div class="stat-card stat-card--blue" *ngIf="stats.shipped > 0">
+      <div class="stat-card__icon">🚚</div>
+      <div class="stat-card__content">
+        <p class="stat-card__value">{{ stats.shipped }}</p>
+        <p class="stat-card__label">En livraison</p>
+      </div>
+    </div>
+
+    <div class="stat-card stat-card--green" *ngIf="stats.delivered > 0">
+      <div class="stat-card__icon">✓</div>
+      <div class="stat-card__content">
+        <p class="stat-card__value">{{ stats.delivered }}</p>
+        <p class="stat-card__label">Livrées</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barre de filtres -->
+  <div class="filters-bar">
+    <!-- Recherche -->
+    <div class="search-box">
+      <img src="assets/icons/search.svg" alt="" class="search-box__icon" />
+      <input
+        type="text"
+        placeholder="Rechercher une commande..."
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="onSearchChange()"
+        class="search-box__input"
+      />
+    </div>
+
+    <!-- Filtres rapides par statut -->
+    <div class="status-filters">
+      <button
+        type="button"
+        *ngFor="let filter of statusFilters"
+        class="status-filter"
+        [class.status-filter--active]="selectedStatus === filter.value"
+        (click)="onStatusFilterChange(filter.value)"
+      >
+        <span>{{ filter.label }}</span>
+        <span class="status-filter__badge" *ngIf="filter.count > 0">
+          {{ filter.count }}
+        </span>
+      </button>
+    </div>
+
+    <!-- Période & Tri -->
+    <div class="filters-row">
+      <select
+        [(ngModel)]="selectedPeriod"
+        (ngModelChange)="onPeriodChange()"
+        class="filter-select"
+      >
+        <option value="all">Toutes les périodes</option>
+        <option value="7days">7 derniers jours</option>
+        <option value="30days">30 derniers jours</option>
+        <option value="90days">3 derniers mois</option>
+        <option value="year">Cette année</option>
+      </select>
+
+      <select
+        [(ngModel)]="sortBy"
+        (ngModelChange)="onSortChange()"
+        class="filter-select"
+      >
+        <option value="date">Trier par date</option>
+        <option value="amount">Trier par montant</option>
+      </select>
+
+      <button
+        type="button"
+        class="sort-toggle"
+        (click)="toggleSortOrder()"
+        [title]="sortOrder === 'desc' ? 'Décroissant' : 'Croissant'"
+      >
+        <span *ngIf="sortOrder === 'desc'">↓</span>
+        <span *ngIf="sortOrder === 'asc'">↑</span>
+      </button>
+
+      <button type="button" class="clear-filters" (click)="clearFilters()">
+        ✕ Réinitialiser
+      </button>
+    </div>
+  </div>
+
+  <!-- Liste des commandes -->
+  <div class="orders-list" *ngIf="filteredOrders.length > 0">
+    <div
+      class="order-card"
+      *ngFor="let order of filteredOrders"
+      (click)="goToOrderDetails(order.id)"
+    >
+      <!-- Header -->
+      <div class="order-card__header">
+        <div class="order-card__id">
+          <span class="order-number">#{{ order.id }}</span>
+          <span class="order-date">{{ formatDate(order.createdAt) }}</span>
+        </div>
+        <div
+          class="status-badge"
+          [ngClass]="'status-badge--' + getStatusColor(order.status)"
+        >
+          {{ getStatusLabel(order.status) }}
+        </div>
+      </div>
+
+      <!-- Barre de progression -->
+      <div class="order-progress">
+        <div
+          class="order-progress__bar"
+          [style.width.%]="getProgressPercentage(order)"
+        ></div>
+      </div>
+
+      <!-- Contenu -->
+      <div class="order-card__body">
+        <!-- Image du premier article -->
+        <div class="order-card__image">
+          <img
+            [src]="order.items[0].image"
+            [alt]="order.items[0].name"
+          />
+        </div>
+
+        <!-- Informations -->
+        <div class="order-card__info">
+          <p class="order-items">
+            {{ getOrderItemsPreview(order) }}
+          </p>
+          <p class="order-quantity">
+            {{ order.items.length }} article{{ order.items.length > 1 ? 's' : '' }}
+          </p>
+          <p class="order-delivery" *ngIf="order.estimatedDelivery && order.status === 'shipped'">
+            📅 Livraison prévue le {{ formatDate(order.estimatedDelivery) }}
+          </p>
+        </div>
+
+        <!-- Prix -->
+        <div class="order-card__price">
+          <p class="price-amount">{{ formatPrice(order.totalFcfa) }} FCFA</p>
+          <p class="price-label">Total</p>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="order-card__actions" (click)="$event.stopPropagation()">
+        <button
+          type="button"
+          class="btn-outline btn-outline--sm"
+          (click)="goToOrderDetails(order.id)"
+        >
+          Voir détails
+        </button>
+
+        <button
+          type="button"
+          class="btn-danger btn-danger--sm"
+          *ngIf="canCancelOrder(order)"
+          (click)="cancelOrder(order, $event)"
+        >
+          Annuler
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- État vide -->
+  <div class="empty-state" *ngIf="filteredOrders.length === 0">
+    <div class="empty-state__icon">📦</div>
+    <h3 class="empty-state__title">
+      {{ searchQuery || selectedStatus !== 'all' ? 'Aucun résultat' : 'Aucune commande' }}
+    </h3>
+    <p class="empty-state__text" *ngIf="searchQuery || selectedStatus !== 'all'">
+      Essayez de modifier vos filtres de recherche
+    </p>
+    <p class="empty-state__text" *ngIf="!searchQuery && selectedStatus === 'all'">
+      Vous n'avez pas encore passé de commande
+    </p>
+
+    <button
+      type="button"
+      class="btn-primary"
+      *ngIf="!searchQuery && selectedStatus === 'all'"
+      routerLink="/recherche"
+    >
+      Découvrir nos produits
+    </button>
+
+    <button
+      type="button"
+      class="btn-secondary"
+      *ngIf="searchQuery || selectedStatus !== 'all'"
+      (click)="clearFilters()"
+    >
+      Réinitialiser les filtres
+    </button>
+  </div>
+</div>

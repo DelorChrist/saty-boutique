@@ -1,0 +1,29 @@
+<section class="shop-header">
+  <h1>Boutique Saty</h1>
+  <p>Découvrez tous nos produits en FCFA.</p>
+
+  <input
+    type="search"
+    placeholder="Rechercher un article..."
+    [(ngModel)]="searchTerm"
+    (input)="onSearch()"
+  />
+</section>
+
+<section>
+  <div *ngIf="filteredProducts.length === 0">
+    <p>Aucun produit trouvé.</p>
+  </div>
+
+  <div *ngIf="filteredProducts.length > 0">
+    <article *ngFor="let product of filteredProducts">
+      <h3>
+        <a [routerLink]="['/produit', product.slug]">
+          {{ product.name }}
+        </a>
+      </h3>
+      <p>{{ product.priceFcfa | number }} FCFA</p>
+      <button (click)="addToCart(product)">Ajouter au panier</button>
+    </article>
+  </div>
+</section>

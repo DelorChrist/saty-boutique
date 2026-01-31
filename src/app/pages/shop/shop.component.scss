@@ -1,0 +1,66 @@
+:host {
+  display: block;
+  padding: 1.5rem 1rem;
+}
+
+.shop-header {
+  margin-bottom: 1.5rem;
+}
+
+.shop-header h1 {
+  font-size: 1.6rem;
+  margin-bottom: 0.4rem;
+}
+
+.shop-header p {
+  margin-bottom: 0.8rem;
+}
+
+.shop-header input[type='search'] {
+  width: 100%;
+  max-width: 22rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+}
+
+section article {
+  border: 1px solid #eee;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  background: #fff;
+}
+
+section article h3 {
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+section article a {
+  color: #111;
+  text-decoration: none;
+}
+
+section article a:hover {
+  color: #e53935;
+}
+
+section article p {
+  margin: 0.25rem 0;
+}
+
+button {
+  margin-top: 0.5rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  border: none;
+  background: #e53935;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+button:hover {
+  filter: brightness(1.05);
+}

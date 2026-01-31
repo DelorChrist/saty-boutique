@@ -1,0 +1,129 @@
+<div class="addresses-page">
+  <h1>Mes adresses</h1>
+
+  <!-- Formulaire ajout / édition d'adresse -->
+  <div class="addresses-form-card">
+    <h2>
+      {{ editingAddressId ? 'Modifier une adresse' : 'Ajouter une nouvelle adresse' }}
+    </h2>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Nom complet *</label>
+        <input
+          type="text"
+          class="form-input"
+          [(ngModel)]="newAddress.fullName"
+          placeholder="Nom et prénom"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Téléphone *</label>
+        <input
+          type="tel"
+          class="form-input"
+          [(ngModel)]="newAddress.phone"
+          placeholder="+225 07 XX XX XX XX"
+        />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Adresse *</label>
+      <input
+        type="text"
+        class="form-input"
+        [(ngModel)]="newAddress.address"
+        placeholder="Numéro, rue, résidence..."
+      />
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Commune *</label>
+        <select
+          class="form-input"
+          [(ngModel)]="newAddress.commune"
+        >
+          <option value="">Sélectionnez une commune</option>
+          <option *ngFor="let commune of communes" [value]="commune">
+            {{ commune }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Ville *</label>
+        <input
+          type="text"
+          class="form-input"
+          [(ngModel)]="newAddress.city"
+        />
+      </div>
+    </div>
+
+    <div class="addresses-form-card__actions">
+      <button
+        type="button"
+        class="addresses__add"
+        (click)="onSaveAddress()"
+      >
+        {{ editingAddressId ? 'Enregistrer les modifications' : 'Ajouter cette adresse' }}
+      </button>
+
+      <button
+        type="button"
+        class="addresses__cancel"
+        *ngIf="editingAddressId"
+        (click)="cancelEdit()"
+      >
+        Annuler
+      </button>
+    </div>
+  </div>
+
+  <!-- Liste des adresses -->
+  <div class="addresses-list" *ngIf="addresses.length; else noAddress">
+    <div class="address-card" *ngFor="let addr of addresses">
+      <div class="address-card__header">
+        <p class="address-card__name">{{ addr.fullName }}</p>
+        <span
+          class="address-card__badge"
+          *ngIf="addr.isAccountAddress"
+        >
+          Adresse du compte
+        </span>
+      </div>
+
+      <p class="address-card__phone">{{ addr.phone }}</p>
+      <p class="address-card__address">
+        {{ addr.address }}<br />
+        {{ addr.commune }}, {{ addr.city }}
+      </p>
+
+      <div class="address-card__actions">
+        <button
+          type="button"
+          class="address-card__select"
+          (click)="onSelectAddress(addr)"
+        >
+          Livrer à cette adresse
+        </button>
+
+        <button
+          type="button"
+          class="address-card__edit"
+          *ngIf="!addr.isAccountAddress"
+          (click)="startEditAddress(addr)"
+        >
+          Modifier
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #noAddress>
+    <p>Vous n’avez pas encore enregistré d’adresse.</p>
+  </ng-template>
+</div>

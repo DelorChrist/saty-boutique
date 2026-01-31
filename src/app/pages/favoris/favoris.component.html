@@ -1,0 +1,83 @@
+<div class="favoris">
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb">
+    <a routerLink="/">Accueil</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">Mes favoris</span>
+  </nav>
+
+  <!-- Header -->
+  <header class="favoris__header">
+    <h1 class="favoris__title">Mes favoris</h1>
+    <p class="favoris__count">{{ favorites.length }} article(s)</p>
+  </header>
+
+  <!-- Liste vide -->
+  <div class="favoris__empty" *ngIf="favorites.length === 0">
+    <div class="favoris__empty-icon">❤️</div>
+    <h2 class="favoris__empty-title">Aucun favori pour le moment</h2>
+    <p class="favoris__empty-text">
+      Parcourez notre catalogue et ajoutez vos articles préférés en cliquant sur le cœur.
+    </p>
+    <a routerLink="/produits" class="btn btn--primary">
+      Découvrir nos produits
+    </a>
+  </div>
+
+  <!-- Grille favoris -->
+  <div class="favoris__content" *ngIf="favorites.length > 0">
+    <button class="favoris__clear" (click)="clearAll()">
+      Vider tous les favoris
+    </button>
+
+    <div class="favoris__grid">
+      <article class="favorite-card" *ngFor="let fav of favorites">
+        <div class="favorite-card__image-wrapper">
+          <img
+            [src]="fav.image"
+            [alt]="fav.name"
+            class="favorite-card__image"
+            (click)="goToProduct(fav.productId)"
+          />
+
+          <!-- Bouton retirer des favoris -->
+          <button
+            type="button"
+            class="favorite-card__remove"
+            (click)="removeFavorite(fav.productId)"
+            title="Retirer des favoris"
+          >
+            ✕
+          </button>
+
+          <!-- Overlay actions -->
+          <div class="favorite-card__overlay">
+            <button
+              type="button"
+              class="favorite-card__icon-btn"
+              (click)="addToCart(fav)"
+              title="Ajouter au panier"
+            >
+              <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
+            </button>
+            <button
+              type="button"
+              class="favorite-card__icon-btn"
+              (click)="goToProduct(fav.productId)"
+              title="Voir les détails"
+            >
+              <img src="assets/icons/oeil.svg" alt="Voir les détails" />
+            </button>
+          </div>
+        </div>
+
+        <div class="favorite-card__body">
+          <h3 class="favorite-card__name" (click)="goToProduct(fav.productId)">
+            {{ fav.name }}
+          </h3>
+          <p class="favorite-card__price">{{ fav.price | number }} FCFA</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,199 @@
+.addresses-page {
+  max-width: 800px;
+  margin: 2rem auto 3rem;
+  padding: 0 1.5rem;
+}
+
+.addresses-page h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 1.5rem;
+}
+
+/* Formulaire */
+
+.addresses-form-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.6rem;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.addresses-form-card h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 1rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.form-group {
+  margin-bottom: 0.75rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 0.3rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 0.4rem;
+  border: 1px solid #ddd;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #e53935;
+  box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.1);
+}
+
+.addresses-form-card__actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.addresses__add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1rem;
+  border-radius: 0.4rem;
+  border: 1px solid #e53935;
+  background: #fff;
+  color: #e53935;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.addresses__add:hover {
+  background: #fff5f5;
+  border-color: #d32f2f;
+  color: #d32f2f;
+}
+
+.addresses__cancel {
+  padding: 0.5rem 0.9rem;
+  border-radius: 0.4rem;
+  border: 1px solid #ccc;
+  background: #fff;
+  color: #555;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+/* Liste des adresses */
+
+.addresses-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.address-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.6rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.address-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.address-card__name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111;
+  margin: 0;
+}
+
+.address-card__badge {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 999px;
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.address-card__phone {
+  font-size: 0.85rem;
+  color: #555;
+  margin: 0;
+}
+
+.address-card__address {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0.2rem 0 0.6rem;
+  line-height: 1.4;
+}
+
+.address-card__actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.address-card__select {
+  padding: 0.5rem 0.9rem;
+  border-radius: 0.4rem;
+  border: none;
+  background: #e53935;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.address-card__select:hover {
+  background: #d32f2f;
+  box-shadow: 0 2px 6px rgba(229, 57, 53, 0.25);
+}
+
+.address-card__edit {
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.4rem;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  color: #555;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .addresses-page {
+    padding: 0 1rem;
+  }
+
+  .addresses-page h1 {
+    font-size: 1.4rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}

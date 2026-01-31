@@ -1,0 +1,463 @@
+<div class="checkout">
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb">
+    <a routerLink="/">Accueil</a>
+    <span class="breadcrumb__separator">/</span>
+    <a routerLink="/panier">Panier</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">Paiement</span>
+  </nav>
+
+  <!-- Header -->
+  <header class="checkout__header">
+    <h1 class="checkout__title">Finaliser ma commande</h1>
+    <p class="checkout__subtitle">
+      Remplissez vos informations pour recevoir votre commande
+    </p>
+  </header>
+
+  <div class="checkout__content">
+    <!-- Formulaire livraison + paiement -->
+    <div class="checkout__form-section">
+      <!-- 1. Informations de livraison -->
+      <section class="form-section">
+        <div class="form-section__header">
+          <h2 class="form-section__title">
+            <span class="form-section__number">1</span>
+            Informations de livraison
+          </h2>
+
+          <button
+            type="button"
+            class="form-section__link"
+            (click)="goToAddresses()"
+          >
+            Voir mes adresses
+          </button>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName" class="form-label">Prénom *</label>
+            <input
+              type="text"
+              id="firstName"
+              class="form-input"
+              [(ngModel)]="deliveryInfo.firstName"
+              #firstNameInput="ngModel"
+              placeholder="Entrez votre prénom"
+              required
+            />
+            <span
+              class="form-error"
+              *ngIf="firstNameInput.invalid && firstNameInput.touched"
+            >
+              Le prénom est requis
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="lastName" class="form-label">Nom *</label>
+            <input
+              type="text"
+              id="lastName"
+              class="form-input"
+              [(ngModel)]="deliveryInfo.lastName"
+              #lastNameInput="ngModel"
+              placeholder="Entrez votre nom"
+              required
+            />
+            <span
+              class="form-error"
+              *ngIf="lastNameInput.invalid && lastNameInput.touched"
+            >
+              Le nom est requis
+            </span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email" class="form-label">Email *</label>
+            <input
+              type="email"
+              id="email"
+              class="form-input"
+              [(ngModel)]="deliveryInfo.email"
+              #emailInput="ngModel"
+              placeholder="exemple@email.com"
+              required
+              email
+            />
+            <span
+              class="form-error"
+              *ngIf="emailInput.invalid && emailInput.touched"
+            >
+              Veuillez entrer un email valide
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="phone" class="form-label">Téléphone *</label>
+            <input
+              type="tel"
+              id="phone"
+              class="form-input"
+              [(ngModel)]="deliveryInfo.phone"
+              #phoneInput="ngModel"
+              placeholder="+225 07 XX XX XX XX"
+              required
+            />
+            <span
+              class="form-error"
+              *ngIf="phoneInput.invalid && phoneInput.touched"
+            >
+              Le téléphone est requis
+            </span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="address" class="form-label">Adresse de livraison *</label>
+          <input
+            type="text"
+            id="address"
+            class="form-input"
+            [(ngModel)]="deliveryInfo.address"
+            #addressInput="ngModel"
+            placeholder="Numéro, rue, résidence..."
+            required
+          />
+          <span
+            class="form-error"
+            *ngIf="addressInput.invalid && addressInput.touched"
+          >
+            L'adresse est requise
+          </span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="commune" class="form-label">Commune *</label>
+            <select
+              id="commune"
+              class="form-input"
+              [(ngModel)]="deliveryInfo.commune"
+              #communeInput="ngModel"
+              required
+            >
+              <option value="">Sélectionnez une commune</option>
+              <option *ngFor="let commune of communes" [value]="commune">
+                {{ commune }}
+              </option>
+            </select>
+            <span
+              class="form-error"
+              *ngIf="communeInput.invalid && communeInput.touched"
+            >
+              Veuillez sélectionner une commune
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="city" class="form-label">Ville *</label>
+            <input
+              type="text"
+              id="city"
+              class="form-input"
+              [(ngModel)]="deliveryInfo.city"
+              readonly
+            />
+          </div>
+        </div>
+
+        <!-- Info frais de livraison -->
+        <div class="delivery-fee-info" *ngIf="deliveryInfo.commune">
+          <p class="delivery-fee-info__text">
+            📦 Frais de livraison pour {{ deliveryInfo.commune }} :
+            <strong>{{ calculateDeliveryFee() | number }} FCFA</strong>
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label for="additionalInfo" class="form-label">
+            Informations complémentaires (optionnel)
+          </label>
+          <textarea
+            id="additionalInfo"
+            class="form-textarea"
+            [(ngModel)]="deliveryInfo.additionalInfo"
+            placeholder="Point de repère, instructions particulières..."
+            rows="3"
+          ></textarea>
+        </div>
+
+        <!-- Bouton Continuer vers le paiement -->
+        <div
+          class="form-section__continue"
+          *ngIf="isDeliveryValid() && !showPaymentSection"
+        >
+          <button
+            type="button"
+            class="continue-btn"
+            (click)="openPaymentSection()"
+          >
+            Continuer vers le paiement ↓
+          </button>
+        </div>
+      </section>
+
+      <!-- 2. Mode de paiement -->
+      <section class="form-section">
+        <h2 class="form-section__title">
+          <span class="form-section__number">2</span>
+          Mode de paiement
+        </h2>
+
+        <!-- Message tant que la section n'est pas ouverte -->
+        <div class="payment-locked" *ngIf="!showPaymentSection">
+          <p>
+            Complétez d'abord les informations de livraison puis cliquez sur
+            "Continuer" pour choisir un mode de paiement.
+          </p>
+        </div>
+
+        <!-- Liste des moyens de paiement (visible seulement si la section est ouverte) -->
+        <div class="payment-methods" *ngIf="showPaymentSection">
+          <!-- Orange Money -->
+          <div
+            class="payment-method"
+            [class.payment-method--active]="selectedPaymentMethod === 'orange-money'"
+            (click)="selectPaymentMethod('orange-money')"
+          >
+            <div class="payment-method__radio">
+              <span
+                class="payment-method__check"
+                *ngIf="selectedPaymentMethod === 'orange-money'"
+              >
+                ✓
+              </span>
+            </div>
+            <div class="payment-method__content">
+              <span class="payment-method__name">Orange Money</span>
+              <span class="payment-method__logo">
+                <img src="assets/icons/orange-money.svg" alt="Orange Money" />
+              </span>
+            </div>
+          </div>
+
+          <!-- MTN Money -->
+          <div
+            class="payment-method"
+            [class.payment-method--active]="selectedPaymentMethod === 'mtn-money'"
+            (click)="selectPaymentMethod('mtn-money')"
+          >
+            <div class="payment-method__radio">
+              <span
+                class="payment-method__check"
+                *ngIf="selectedPaymentMethod === 'mtn-money'"
+              >
+                ✓
+              </span>
+            </div>
+            <div class="payment-method__content">
+              <span class="payment-method__name">MTN Mobile Money</span>
+              <span class="payment-method__logo">
+                <img src="assets/icons/mtn-money.png" alt="MTN Mobile Money" />
+              </span>
+            </div>
+          </div>
+
+          <!-- Moov Money -->
+          <div
+            class="payment-method"
+            [class.payment-method--active]="selectedPaymentMethod === 'moov-money'"
+            (click)="selectPaymentMethod('moov-money')"
+          >
+            <div class="payment-method__radio">
+              <span
+                class="payment-method__check"
+                *ngIf="selectedPaymentMethod === 'moov-money'"
+              >
+                ✓
+              </span>
+            </div>
+            <div class="payment-method__content">
+              <span class="payment-method__name">Moov Money</span>
+              <span class="payment-method__logo">
+                <img src="assets/icons/moov-money.jpg" alt="Moov Money" />
+              </span>
+            </div>
+          </div>
+
+          <!-- Wave -->
+          <div
+            class="payment-method"
+            [class.payment-method--active]="selectedPaymentMethod === 'wave'"
+            (click)="selectPaymentMethod('wave')"
+          >
+            <div class="payment-method__radio">
+              <span
+                class="payment-method__check"
+                *ngIf="selectedPaymentMethod === 'wave'"
+              >
+                ✓
+              </span>
+            </div>
+            <div class="payment-method__content">
+              <span class="payment-method__name">Wave</span>
+              <span class="payment-method__logo">
+                <img src="assets/icons/wave.jpg" alt="Wave" />
+              </span>
+            </div>
+          </div>
+
+          <!-- Carte bancaire -->
+          <div
+            class="payment-method"
+            [class.payment-method--active]="selectedPaymentMethod === 'card'"
+            (click)="selectPaymentMethod('card')"
+          >
+            <div class="payment-method__radio">
+              <span
+                class="payment-method__check"
+                *ngIf="selectedPaymentMethod === 'card'"
+              >
+                ✓
+              </span>
+            </div>
+            <div class="payment-method__content">
+              <span class="payment-method__name">Carte bancaire</span>
+              <span class="payment-method__logo">
+                <img src="assets/icons/visa-cards.jpg" alt="Carte bancaire" />
+              </span>
+            </div>
+          </div>
+
+          <!-- Cash à la livraison -->
+          <div
+            class="payment-method"
+            [class.payment-method--active]="selectedPaymentMethod === 'cash'"
+            (click)="selectPaymentMethod('cash')"
+          >
+            <div class="payment-method__radio">
+              <span
+                class="payment-method__check"
+                *ngIf="selectedPaymentMethod === 'cash'"
+              >
+                ✓
+              </span>
+            </div>
+            <div class="payment-method__content">
+              <span class="payment-method__name">Paiement à la livraison</span>
+              <span class="payment-method__logo">
+                <img src="assets/icons/cash.jpg" alt="Paiement à la livraison" />
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- texte explicatif -->
+        <p class="payment-info" *ngIf="selectedPaymentMethod && showPaymentSection">
+          <span
+            *ngIf="
+              selectedPaymentMethod === 'orange-money' ||
+              selectedPaymentMethod === 'mtn-money' ||
+              selectedPaymentMethod === 'moov-money' ||
+              selectedPaymentMethod === 'wave'
+            "
+          >
+            📱 Vous recevrez un SMS avec les instructions de paiement après validation.
+          </span>
+          <span *ngIf="selectedPaymentMethod === 'card'">
+            💳 Vous serez redirigé vers la page de paiement sécurisé.
+          </span>
+          <span *ngIf="selectedPaymentMethod === 'cash'">
+            💵 Préparez le montant exact pour la livraison.
+          </span>
+        </p>
+      </section>
+    </div>
+
+    <!-- Récapitulatif commande -->
+    <aside class="checkout__summary">
+      <div class="summary">
+        <h2 class="summary__title">Récapitulatif</h2>
+
+        <!-- Articles -->
+        <div class="summary__items">
+          <div class="summary-item" *ngFor="let item of items">
+            <img
+              [src]="item.image"
+              [alt]="item.name"
+              class="summary-item__image"
+            />
+            <div class="summary-item__info">
+              <p class="summary-item__name">{{ item.name }}</p>
+              <p class="summary-item__details">
+                <span *ngIf="item.size">Taille: {{ item.size }}</span>
+                <span *ngIf="item.color"> • {{ item.color }}</span>
+              </p>
+              <p class="summary-item__quantity">Qté: {{ item.quantity }}</p>
+            </div>
+            <p class="summary-item__price">
+              {{ item.price * item.quantity | number }} FCFA
+            </p>
+          </div>
+        </div>
+
+        <!-- Totaux -->
+        <div class="summary__totals">
+          <div class="summary__row">
+            <span>
+              Sous-total ({{ items.length }} article
+              <span *ngIf="items.length > 1">s</span>)
+            </span>
+            <span>{{ subtotal | number }} FCFA</span>
+          </div>
+
+          <div class="summary__row" *ngIf="deliveryInfo.commune">
+            <span>Livraison ({{ deliveryInfo.commune }})</span>
+            <span>{{ calculateDeliveryFee() | number }} FCFA</span>
+          </div>
+
+          <div class="summary__row" *ngIf="!deliveryInfo.commune">
+            <span>Livraison</span>
+            <span class="summary__row--pending">À calculer</span>
+          </div>
+
+          <div class="summary__divider"></div>
+
+          <div class="summary__row summary__row--total">
+            <span>Total à payer</span>
+            <span>{{ total | number }} FCFA</span>
+          </div>
+        </div>
+
+        <!-- Bouton validation -->
+        <button
+          type="button"
+          class="summary__submit"
+          [class.summary__submit--loading]="isSubmitting"
+          [disabled]="!isFormValid() || isSubmitting"
+          (click)="submitOrder()"
+        >
+          <span class="summary__submit-spinner" *ngIf="isSubmitting"></span>
+          <span *ngIf="!isSubmitting">Valider la commande</span>
+          <span *ngIf="isSubmitting">Validation en cours...</span>
+        </button>
+
+        <a routerLink="/panier" class="summary__back">
+          ← Retour au panier
+        </a>
+
+        <!-- Info sécurité -->
+        <div class="summary__security">
+          <p class="summary__security-text">
+            🔒 Paiement sécurisé • Vos données sont protégées
+          </p>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
