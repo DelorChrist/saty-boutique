@@ -1,29 +1,37 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
+if (!process.env.DB_NAME || !process.env.DB_USER || !process.env.DB_PASS) {
+    console.error('Missing required DB environment variables');
+    process.exit(1);
+}
+
 const sequelize = new Sequelize(
-    process.env.DB_NAME || 'saty_boutique',
-    process.env.DB_USER || 'root',
-    process.env.DB_PASS || '1234',
+    process.env.DB_NAME,
+    process.env.DB_USER,
+    process.env.DB_PASS,
     {
         host: process.env.DB_HOST || 'localhost',
         dialect: 'mysql',
         logging: false,
+        pool: {
+            max: 10,
+            min: 0,
+            acquire: 30000,
+            idle: 10000
+        }
     }
 );
 
 const connectDB = async () => {
     try {
         await sequelize.authenticate();
-        console.log('MySQL Connected using Sequelize.');
-
-        // Synch models (removed alter: true to prevent too many keys error)
-        // Use migrations in production instead
+        console.log('MySQL Connected.');
         await sequelize.sync();
         console.log('Database Synced.');
-
     } catch (error) {
-        console.error('Unable to connect to the database:', error);
+        console.error('Unable to connect to the database:', error.message);
+        process.exit(1);
     }
 };
 

@@ -19,10 +19,10 @@ const registerValidation = [
         .withMessage('Email invalide')
         .normalizeEmail(),
     body('password')
-        .isLength({ min: 6 })
-        .withMessage('Le mot de passe doit contenir au moins 6 caractères')
-        .matches(/\d/)
-        .withMessage('Le mot de passe doit contenir au moins un chiffre'),
+        .isLength({ min: 8 })
+        .withMessage('Le mot de passe doit contenir au moins 8 caractères')
+        .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])/)
+        .withMessage('Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre'),
     body('firstName')
         .trim()
         .notEmpty()

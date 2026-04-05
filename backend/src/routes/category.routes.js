@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const categoryController = require('../controllers/category.controller');
-const upload = require('../middlewares/upload');
+const { upload, verifyMagicNumber } = require('../middlewares/upload');
 const { optimizeImage } = require('../middlewares/image-optimizer');
 const { authenticate, authorize } = require('../middlewares/auth');
 const { body, param, validationResult } = require('express-validator');
@@ -31,10 +31,10 @@ const categoryIdValidation = [
 
 router.route('/')
     .get(categoryController.getCategories)
-    .post(authenticate, authorize('admin'), upload.single('image'), optimizeImage, categoryValidation, categoryController.createCategory);
+    .post(authenticate, authorize('admin'), upload.single('image'), verifyMagicNumber, optimizeImage, categoryValidation, categoryController.createCategory);
 
 router.route('/:id')
-    .put(authenticate, authorize('admin'), upload.single('image'), optimizeImage, categoryIdValidation, categoryValidation, categoryController.updateCategory)
+    .put(authenticate, authorize('admin'), upload.single('image'), verifyMagicNumber, optimizeImage, categoryIdValidation, categoryValidation, categoryController.updateCategory)
     .delete(authenticate, authorize('admin'), categoryIdValidation, categoryController.deleteCategory);
 
 router.get('/slug/:slug', categoryController.getCategoryBySlug);

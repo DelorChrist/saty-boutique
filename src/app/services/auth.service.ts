@@ -11,6 +11,12 @@ import { environment } from '../../environments/environment';
 const TOKEN_KEY = 'saty_auth_token';
 const CURRENT_USER_KEY = 'saty_current_user';
 
+const storage = {
+  get: (key: string) => sessionStorage.getItem(key),
+  set: (key: string, value: string) => sessionStorage.setItem(key, value),
+  remove: (key: string) => sessionStorage.removeItem(key)
+};
+
 @Injectable({
   providedIn: 'root',
 })
@@ -20,7 +26,7 @@ export class AuthService {
   public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(private http: HttpClient, private promoService: PromoService, private inboxService: InboxService) {
-    const storedUser = localStorage.getItem(CURRENT_USER_KEY);
+    const storedUser = storage.get(CURRENT_USER_KEY);
     if (storedUser) {
       const user = JSON.parse(storedUser);
       this.currentUserSubject.next(user);
@@ -40,7 +46,7 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!this.currentUserValue && !!localStorage.getItem(TOKEN_KEY);
+    return !!this.currentUserValue && !!storage.get(TOKEN_KEY);
   }
 
   isAdmin(): boolean {
@@ -72,8 +78,8 @@ export class AuthService {
     return this.http.post<any>(`${this.apiUrl}/login`, { email, password }).pipe(
       tap(res => {
         if (res.token && res.user) {
-          localStorage.setItem(TOKEN_KEY, res.token);
-          localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(res.user));
+          storage.set(TOKEN_KEY, res.token);
+          storage.set(CURRENT_USER_KEY, JSON.stringify(res.user));
           this.currentUserSubject.next(res.user);
           
           // Start notification polling
@@ -90,8 +96,8 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(CURRENT_USER_KEY);
+    storage.remove(TOKEN_KEY);
+    storage.remove(CURRENT_USER_KEY);
     this.currentUserSubject.next(null);
     this.inboxService.reset();
   }
@@ -99,7 +105,7 @@ export class AuthService {
   getMe(): Observable<User> {
     return this.http.get<User>(`${this.apiUrl}/me`).pipe(
       tap(user => {
-        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+        storage.set(CURRENT_USER_KEY, JSON.stringify(user));
         this.currentUserSubject.next(user);
       })
     );
@@ -118,7 +124,7 @@ export class AuthService {
 
     return this.http.put<User>(`${this.apiUrl}/profile`, payload).pipe(
       tap(updatedUser => {
-        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
+        storage.set(CURRENT_USER_KEY, JSON.stringify(updatedUser));
         this.currentUserSubject.next(updatedUser);
       })
     );

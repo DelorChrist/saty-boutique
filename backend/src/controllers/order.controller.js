@@ -266,28 +266,45 @@ exports.updateOrderStatus = async (req, res) => {
 // @desc    Cancel order (owner)
 // @route   PUT /api/orders/:id/cancel
 exports.cancelOrder = async (req, res) => {
+    const transaction = await sequelize.transaction();
     try {
-        const order = await Order.findByPk(req.params.id);
+        const order = await Order.findByPk(req.params.id, {
+            include: [{ model: OrderItem, as: 'items' }],
+            transaction
+        });
 
         if (!order) {
+            await transaction.rollback();
             return res.status(404).json({ message: 'Commande non trouvée' });
         }
 
         const isOwner = order.userId === req.user?.id;
         if (!isOwner) {
+            await transaction.rollback();
             return res.status(403).json({ message: 'Accès refusé' });
         }
 
         if (!['pending', 'confirmed', 'processing'].includes(order.status)) {
+            await transaction.rollback();
             return res.status(400).json({ message: 'Cette commande ne peut pas être annulée' });
+        }
+
+        // Restaurer le stock
+        for (const item of order.items) {
+            const product = await Product.findByPk(item.productId, { transaction });
+            if (product) {
+                await product.update({ stock: product.stock + item.quantity }, { transaction });
+            }
         }
 
         order.status = 'cancelled';
         order.cancelledAt = new Date();
+        await order.save({ transaction });
 
-        await order.save();
+        await transaction.commit();
         res.json(order);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        await transaction.rollback();
+        res.status(500).json({ message: 'Erreur lors de l’annulation' });
     }
 };

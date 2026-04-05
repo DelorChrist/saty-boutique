@@ -45,7 +45,7 @@ export class CartService {
 
   private loadFromStorage(): void {
     const key = this.getStorageKey();
-    const stored = localStorage.getItem(key);
+    const stored = sessionStorage.getItem(key);
     if (stored) {
       try {
         this.items = JSON.parse(stored);
@@ -61,7 +61,7 @@ export class CartService {
 
   private saveToStorage(): void {
     const key = this.getStorageKey();
-    localStorage.setItem(key, JSON.stringify(this.items));
+    sessionStorage.setItem(key, JSON.stringify(this.items));
     this.itemsSubject.next(this.items);
   }
 

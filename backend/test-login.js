@@ -1,8 +1,18 @@
+require('dotenv').config();
+
+const EMAIL = process.env.ADMIN_EMAIL;
+const PASSWORD = process.env.ADMIN_PASSWORD;
+
+if (!EMAIL || !PASSWORD) {
+    console.error('❌ ADMIN_EMAIL and ADMIN_PASSWORD must be set in .env');
+    process.exit(1);
+}
+
 async function testLogin() {
     try {
         console.log('Testing login with:');
-        console.log('Email: admin@satyboutique.com');
-        console.log('Password: admin123');
+        console.log('Email:', EMAIL);
+        console.log('Password: [hidden]');
         console.log('\nSending request to http://localhost:3000/api/auth/login...\n');
         
         const response = await fetch('http://localhost:3000/api/auth/login', {
@@ -11,8 +21,8 @@ async function testLogin() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                email: 'admin@satyboutique.com',
-                password: 'admin123'
+                email: EMAIL,
+                password: PASSWORD
             })
         });
 

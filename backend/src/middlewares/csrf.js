@@ -18,7 +18,10 @@ const csrfProtection = (req, res, next) => {
         return res.status(403).json({ message: 'Token CSRF manquant' });
     }
 
-    if (tokenFromHeader !== tokenFromCookie) {
+    const headerBuf = Buffer.from(tokenFromHeader);
+    const cookieBuf = Buffer.from(tokenFromCookie);
+
+    if (headerBuf.length !== cookieBuf.length || !crypto.timingSafeEqual(headerBuf, cookieBuf)) {
         return res.status(403).json({ message: 'Token CSRF invalide' });
     }
 

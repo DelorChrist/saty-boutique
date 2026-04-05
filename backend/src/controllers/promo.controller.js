@@ -121,11 +121,15 @@ exports.deletePromoCode = async (req, res, next) => {
 exports.validatePromoCode = async (req, res, next) => {
     try {
         const { code, amount } = req.body;
-        const promo = await PromoCode.findOne({ 
-            where: { 
-                code: code.toUpperCase(), 
-                isActive: true 
-            } 
+
+        if (!code || typeof code !== 'string') {
+            return res.status(400).json({ message: 'Code promo invalide' });
+        }
+
+        const sanitizedCode = code.trim().toUpperCase().replace(/[^A-Z0-9-]/g, '');
+
+        const promo = await PromoCode.findOne({
+            where: { code: sanitizedCode, isActive: true }
         });
 
         if (!promo) {
@@ -136,9 +140,13 @@ exports.validatePromoCode = async (req, res, next) => {
             return res.status(400).json({ message: 'Ce code promo a expiré' });
         }
 
+        if (promo.maxUses !== null && promo.usedCount >= promo.maxUses) {
+            return res.status(400).json({ message: 'Ce code promo a atteint sa limite d\'utilisation' });
+        }
+
         if (amount < promo.minOrderAmount) {
-            return res.status(400).json({ 
-                message: `Le montant minimum pour ce code est de ${promo.minOrderAmount} FCFA` 
+            return res.status(400).json({
+                message: `Le montant minimum pour ce code est de ${promo.minOrderAmount} FCFA`
             });
         }
 

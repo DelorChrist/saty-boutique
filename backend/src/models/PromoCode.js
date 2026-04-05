@@ -10,11 +10,15 @@ const PromoCode = sequelize.define('PromoCode', {
     code: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true
+        unique: true,
+        validate: {
+            is: /^[A-Z0-9-]+$/
+        }
     },
     discount: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        validate: { min: 0 }
     },
     type: {
         type: DataTypes.ENUM('percentage', 'fixed'),
@@ -29,7 +33,18 @@ const PromoCode = sequelize.define('PromoCode', {
     },
     minOrderAmount: {
         type: DataTypes.INTEGER,
-        defaultValue: 0
+        defaultValue: 0,
+        validate: { min: 0 }
+    },
+    maxUses: {
+        type: DataTypes.INTEGER,
+        defaultValue: null,
+        validate: { min: 1 }
+    },
+    usedCount: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        validate: { min: 0 }
     }
 });
 
