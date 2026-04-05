@@ -77,7 +77,7 @@
       <div class="items-list">
         <div class="item-card" *ngFor="let item of order.items">
           <div class="item-card__image" (click)="goToProduct(item.productId)">
-            <img [src]="item.image" [alt]="item.name" />
+            <img [src]="getImageUrl(item.image)" [alt]="item.name" />
           </div>
 
           <div class="item-card__info">

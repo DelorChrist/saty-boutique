@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FavoritesService, FavoriteItem } from '../../services/favorites.service';
 import { CartService } from '../../services/cart.service';
+import { ToastService } from '../../services/toast.service';
+import { ConfirmDialogService } from '../../services/confirm-dialog.service';
 
 @Component({
   selector: 'app-favoris',
@@ -18,6 +20,8 @@ export class FavorisComponent implements OnInit {
     public favoritesService: FavoritesService,
     private cartService: CartService,
     private router: Router,
+    private toastService: ToastService,
+    private confirmService: ConfirmDialogService
   ) {}
 
   ngOnInit(): void {
@@ -41,12 +45,19 @@ export class FavorisComponent implements OnInit {
       quantity: 1,
     });
 
-    alert(`${favorite.name} ajouté au panier !`);
+    this.toastService.success(`${favorite.name} ajouté au panier !`);
   }
 
-  clearAll(): void {
-    if (confirm('Voulez-vous vraiment vider tous vos favoris ?')) {
+  async clearAll(): Promise<void> {
+    const confirmed = await this.confirmService.confirm(
+      'Voulez-vous vraiment vider tous vos favoris ?',
+      'Vider les favoris',
+      { confirmText: 'Vider', type: 'warning' }
+    );
+
+    if (confirmed) {
       this.favoritesService.clearFavorites();
+      this.toastService.success('Favoris vidés');
     }
   }
 

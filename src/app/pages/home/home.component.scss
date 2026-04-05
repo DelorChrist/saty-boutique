@@ -187,6 +187,78 @@
   line-height: 1.5;
 }
 
+/* BEST SELLER CARD */
+.best-seller-card {
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #ffe9e9;
+  background: white;
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(229, 57, 53, 0.1);
+    border-color: #e53935;
+
+    .best-seller-image {
+      transform: scale(1.05);
+    }
+
+    .btn-best-seller {
+      background: #e53935;
+      color: white;
+    }
+  }
+}
+
+.best-seller-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  margin-bottom: 0 !important;
+}
+
+.best-seller-image-container {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 0.6rem;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  background: #f9f9f9;
+}
+
+.best-seller-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.best-seller-price {
+  font-weight: 700;
+  color: #e53935;
+  font-size: 1.1rem;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.btn-best-seller {
+  margin-top: 1rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  border: 1px solid #e53935;
+  background: transparent;
+  color: #e53935;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
 /* BANNER NEW ARRIVALS */
 .home-banner {
   margin-top: 2.5rem;

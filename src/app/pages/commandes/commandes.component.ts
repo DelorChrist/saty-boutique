@@ -5,6 +5,9 @@ import { FormsModule } from '@angular/forms';
 import { OrdersService } from '../../services/orders.service';
 import { AuthService } from '../../services/auth.service';
 import { Order, OrderStatus } from '../../models/order.model';
+import { ToastService } from '../../services/toast.service';
+import { ConfirmDialogService } from '../../services/confirm-dialog.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-commandes',
@@ -43,6 +46,8 @@ export class CommandesComponent implements OnInit {
     private ordersService: OrdersService,
     private authService: AuthService,
     private router: Router,
+    private toastService: ToastService,
+    private confirmService: ConfirmDialogService
   ) {}
 
   ngOnInit(): void {
@@ -54,20 +59,28 @@ export class CommandesComponent implements OnInit {
     }
 
     this.loadOrders();
-    this.calculateStats();
-    this.buildStatusFilters();
-    this.applyFilters();
   }
 
   /* ========== CHARGEMENT DES DONNÉES ========== */
 
   private loadOrders(): void {
-    this.orders = this.ordersService.getMyOrders();
-    this.filteredOrders = [...this.orders];
+    this.ordersService.getMyOrders().subscribe({
+      next: (orders: Order[]) => {
+        this.orders = orders;
+        this.filteredOrders = [...this.orders];
+        this.calculateStats();
+        this.buildStatusFilters();
+        this.applyFilters();
+      },
+      error: () => {
+        this.orders = [];
+        this.filteredOrders = [];
+      }
+    });
   }
 
   private calculateStats(): void {
-    const stats = this.ordersService.getUserStats();
+    const stats = this.ordersService.getUserStats(this.orders);
 
     this.stats = {
       total: stats.totalOrders,
@@ -105,7 +118,7 @@ export class CommandesComponent implements OnInit {
     }
 
     if (this.searchQuery.trim()) {
-      result = this.ordersService.searchOrders(this.searchQuery);
+      result = this.ordersService.searchOrders(this.orders, this.searchQuery);
       if (this.selectedStatus !== 'all') {
         result = result.filter(o => o.status === this.selectedStatus);
       }
@@ -197,31 +210,26 @@ export class CommandesComponent implements OnInit {
     return this.ordersService.canCancelOrder(order);
   }
 
-  cancelOrder(order: Order, event: Event): void {
+  async cancelOrder(order: Order, event: Event): Promise<void> {
     event.stopPropagation();
 
-    const confirmed = confirm(
+    const confirmed = await this.confirmService.confirm(
       `Voulez-vous vraiment annuler la commande #${order.id} ?\n\nCette action est irréversible.`,
+      'Annuler la commande',
+      { confirmText: 'Annuler', cancelText: 'Retour', type: 'danger' }
     );
 
     if (!confirmed) return;
 
-    const reason = prompt("Raison de l'annulation (optionnel) :");
-
-    const success = this.ordersService.cancelOrder(
-      order.id,
-      reason || undefined,
-    );
-
-    if (success) {
-      alert('Commande annulée avec succès');
-      this.loadOrders();
-      this.calculateStats();
-      this.buildStatusFilters();
-      this.applyFilters();
-    } else {
-      alert("Impossible d'annuler cette commande");
-    }
+    this.ordersService.cancelOrder(order.id).subscribe({
+      next: () => {
+        this.toastService.success('Commande annulée avec succès');
+        this.loadOrders();
+      },
+      error: (err: any) => {
+        this.toastService.error(err.error?.message || "Impossible d'annuler cette commande");
+      }
+    });
   }
 
   /* ========== UTILITAIRES ========== */
@@ -269,5 +277,11 @@ export class CommandesComponent implements OnInit {
     };
 
     return statusProgress[order.status] || 0;
+  }
+
+  getImageUrl(imagePath: string): string {
+    if (!imagePath) return '/assets/placeholder.jpg';
+    if (imagePath.startsWith('http')) return imagePath;
+    return `${environment.mediaUrl}${imagePath}`;
   }
 }

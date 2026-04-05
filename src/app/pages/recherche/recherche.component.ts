@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../services/cart.service';
 import { FavoritesService } from '../../services/favorites.service';
+import { ToastService } from '../../services/toast.service';
 
 interface Product {
   id: string;
@@ -54,7 +55,8 @@ export class RechercheComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private cartService: CartService,
-    public favoritesService: FavoritesService
+    public favoritesService: FavoritesService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -258,7 +260,7 @@ export class RechercheComponent implements OnInit {
       quantity: 1,
     });
 
-    alert(`${product.name} ajouté au panier !`);
+    this.toastService.success(`${product.name} ajouté au panier !`);
   }
 
   toggleFavorite(product: Product): void {
@@ -272,9 +274,9 @@ export class RechercheComponent implements OnInit {
     });
 
     if (isFav) {
-      alert(`${product.name} ajouté aux favoris ❤️`);
+      this.toastService.success(`${product.name} ajouté aux favoris ❤️`);
     } else {
-      alert(`${product.name} retiré des favoris`);
+      this.toastService.info(`${product.name} retiré des favoris`);
     }
   }
 }

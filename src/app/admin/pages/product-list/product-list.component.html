@@ -1,0 +1,302 @@
+<div class="product-list-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Gestion des Produits</h1>
+      <p class="page-subtitle">Gérez votre catalogue de produits</p>
+    </div>
+    <a routerLink="/admin/products/new" class="btn-primary">
+      <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      Nouveau Produit
+    </a>
+  </div>
+
+  <div class="table-container">
+    <table class="products-table">
+      <thead>
+        <tr>
+          <th>Produit</th>
+          <th>Catégorie</th>
+          <th>Prix</th>
+          <th>Stock</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let product of products$ | async">
+          <td>
+            <div class="product-cell">
+              <img [src]="getImageUrl(product.images[0])" [alt]="product.name" class="product-image">
+              <div>
+                <div class="product-name">{{ product.name }}</div>
+                <div class="product-brand">{{ product.brand }}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="category-badge">{{ product.categoryId }}</span>
+          </td>
+          <td>
+            <div class="price-cell">
+              <span class="price-current">{{ product.price }} FCFA</span>
+              <span *ngIf="product.oldPrice" class="price-old">{{ product.oldPrice }} FCFA</span>
+            </div>
+          </td>
+          <td>
+            <span class="stock-badge" [class.stock-low]="product.stock < 10">
+              {{ product.stock }}
+            </span>
+          </td>
+          <td>
+            <button (click)="toggleStatus(product)" class="status-toggle" [class.status-active]="product.isActive"
+              [class.status-inactive]="!product.isActive">
+              {{ product.isActive ? 'Actif' : 'Inactif' }}
+            </button>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <a [routerLink]="['/admin/products/edit', product.id]" class="btn-action btn-edit" title="Modifier">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </a>
+              <button (click)="deleteProduct(product)" class="btn-action btn-delete" title="Supprimer">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+  .product-list-container {
+    padding: 2rem;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .page-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 0.25rem;
+  }
+
+  .page-subtitle {
+    color: #666;
+    font-size: 0.95rem;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: #e53935;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .btn-primary:hover {
+    background: #d32f2f;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(229, 57, 53, 0.3);
+  }
+
+  .btn-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .table-container {
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid #f0f0f0;
+    overflow: hidden;
+  }
+
+  .products-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .products-table thead {
+    background: #f9f9f9;
+    border-bottom: 2px solid #e0e0e0;
+  }
+
+  .products-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .products-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .products-table tbody tr:hover {
+    background: #fafafa;
+  }
+
+  .product-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .product-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    background: #f5f5f5;
+  }
+
+  .product-name {
+    font-weight: 500;
+    color: #1a1a1a;
+    margin-bottom: 0.25rem;
+  }
+
+  .product-brand {
+    font-size: 0.8rem;
+    color: #999;
+  }
+
+  .category-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: #f0f0f0;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    color: #666;
+  }
+
+  .price-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .price-current {
+    font-weight: 600;
+    color: #e53935;
+  }
+
+  .price-old {
+    font-size: 0.8rem;
+    color: #999;
+    text-decoration: line-through;
+  }
+
+  .stock-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-radius: 999px;
+    font-weight: 500;
+    font-size: 0.85rem;
+  }
+
+  .stock-badge.stock-low {
+    background: #ffebee;
+    color: #c62828;
+  }
+
+  .status-toggle {
+    padding: 0.4rem 1rem;
+    border: none;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .status-active {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  .status-active:hover {
+    background: #c8e6c9;
+  }
+
+  .status-inactive {
+    background: #ffebee;
+    color: #c62828;
+  }
+
+  .status-inactive:hover {
+    background: #ffcdd2;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .btn-action {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e0e0e0;
+    background: white;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+  }
+
+  .btn-action svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .btn-edit {
+    color: #2196f3;
+  }
+
+  .btn-edit:hover {
+    background: #e3f2fd;
+    border-color: #2196f3;
+  }
+
+  .btn-delete {
+    color: #e53935;
+  }
+
+  .btn-delete:hover {
+    background: #ffebee;
+    border-color: #e53935;
+  }
+</style>

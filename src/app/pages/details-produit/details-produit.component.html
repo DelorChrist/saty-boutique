@@ -4,28 +4,15 @@
   <div class="details__gallery">
     <!-- Image principale avec zoom -->
     <div class="gallery-main" [class.gallery-main--zoomed]="isZoomed">
-      <img
-        [src]="selectedImage"
-        [alt]="p.name"
-        class="gallery-main__image"
-        (click)="toggleZoom()"
-      />
+      <img [src]="selectedImage" [alt]="p.name" class="gallery-main__image" (click)="toggleZoom()" />
 
       <!-- Boutons navigation -->
-      <button
-        type="button"
-        class="gallery-nav gallery-nav--prev"
-        (click)="prevImage(); $event.stopPropagation()"
-        *ngIf="p.images.length > 1"
-      >
+      <button type="button" class="gallery-nav gallery-nav--prev" (click)="prevImage(); $event.stopPropagation()"
+        *ngIf="p.images.length > 1">
         ‹
       </button>
-      <button
-        type="button"
-        class="gallery-nav gallery-nav--next"
-        (click)="nextImage(); $event.stopPropagation()"
-        *ngIf="p.images.length > 1"
-      >
+      <button type="button" class="gallery-nav gallery-nav--next" (click)="nextImage(); $event.stopPropagation()"
+        *ngIf="p.images.length > 1">
         ›
       </button>
 
@@ -42,13 +29,8 @@
 
     <!-- Thumbnails -->
     <div class="gallery-thumbnails" *ngIf="p.images.length > 1">
-      <button
-        type="button"
-        class="thumbnail"
-        *ngFor="let img of p.images; let i = index"
-        [class.thumbnail--active]="i === currentImageIndex"
-        (click)="selectImage(i)"
-      >
+      <button type="button" class="thumbnail" *ngFor="let img of p.images; let i = index"
+        [class.thumbnail--active]="i === currentImageIndex" (click)="selectImage(i)">
         <img [src]="img" [alt]="'Vue ' + (i + 1)" />
       </button>
     </div>
@@ -72,17 +54,12 @@
     <!-- Avis et notation -->
     <div class="details__rating" *ngIf="p.rating">
       <div class="rating-stars">
-        <span
-          *ngFor="let star of getStars(p.rating)"
-          [class.star--filled]="star === 1"
-        >
+        <span *ngFor="let star of getStars(p.rating)" [class.star--filled]="star === 1">
           ★
         </span>
         <span class="rating-value">{{ p.rating }}</span>
       </div>
-      <span class="rating-reviews" *ngIf="p.reviews">
-        ({{ p.reviews }} avis)
-      </span>
+
     </div>
 
     <!-- Prix -->
@@ -113,38 +90,28 @@
     <!-- Options (taille / couleur) -->
     <div class="details__options">
       <!-- Taille -->
-      <div class="details__option" *ngIf="p.sizes?.length">
+      <div class="details__option" *ngIf="availableSizes.length">
         <label class="details__option-label">
           Taille :
           <span class="selected-value">{{ selectedSize }}</span>
         </label>
         <div class="details__chips">
-          <button
-            type="button"
-            *ngFor="let size of p.sizes"
-            class="details__chip"
-            [class.details__chip--active]="size === selectedSize"
-            (click)="changeSize(size)"
-          >
+          <button type="button" *ngFor="let size of availableSizes" class="details__chip"
+            [class.details__chip--active]="size === selectedSize" (click)="changeSize(size)">
             {{ size }}
           </button>
         </div>
       </div>
 
       <!-- Couleur -->
-      <div class="details__option" *ngIf="p.colors?.length">
+      <div class="details__option" *ngIf="availableColors.length">
         <label class="details__option-label">
           Couleur :
           <span class="selected-value">{{ selectedColor }}</span>
         </label>
         <div class="details__chips">
-          <button
-            type="button"
-            *ngFor="let color of p.colors"
-            class="details__chip"
-            [class.details__chip--active]="color === selectedColor"
-            (click)="changeColor(color)"
-          >
+          <button type="button" *ngFor="let color of availableColors" class="details__chip"
+            [class.details__chip--active]="color === selectedColor" (click)="changeColor(color)">
             {{ color }}
           </button>
         </div>
@@ -155,23 +122,13 @@
     <div class="details__actions">
       <!-- Si l'article N'EST PAS dans le panier -->
       <ng-container *ngIf="currentQuantity === null; else inCartBlock">
-        <button
-          type="button"
-          class="details__btn-cart"
-          (click)="addToCart()"
-          [disabled]="p.stock === 0"
-        >
+        <button type="button" class="details__btn-cart" (click)="addToCart()" [disabled]="p.stock === 0">
           <span *ngIf="p.stock === 0">Rupture de stock</span>
           <span *ngIf="p.stock !== 0">Ajouter au panier</span>
         </button>
 
-        <button
-          type="button"
-          class="details__btn-fav"
-          [class.details__btn-fav--active]="isFavorite"
-          (click)="toggleFavorite()"
-          aria-label="Ajouter aux favoris"
-        >
+        <button type="button" class="details__btn-fav" [class.details__btn-fav--active]="isFavorite"
+          (click)="toggleFavorite()" aria-label="Ajouter aux favoris">
           ♥
         </button>
       </ng-container>
@@ -182,11 +139,7 @@
           <span class="details__in-cart-label">Déjà dans votre panier</span>
 
           <div class="details__qty-controls">
-            <button
-              type="button"
-              (click)="changeCartQuantity(-1)"
-              [disabled]="(currentQuantity ?? 0) <= 1"
-            >
+            <button type="button" (click)="changeCartQuantity(-1)" [disabled]="(currentQuantity ?? 0) <= 1">
               −
             </button>
             <span>{{ currentQuantity }}</span>
@@ -194,13 +147,8 @@
           </div>
         </div>
 
-        <button
-          type="button"
-          class="details__btn-fav"
-          [class.details__btn-fav--active]="isFavorite"
-          (click)="toggleFavorite()"
-          aria-label="Ajouter aux favoris"
-        >
+        <button type="button" class="details__btn-fav" [class.details__btn-fav--active]="isFavorite"
+          (click)="toggleFavorite()" aria-label="Ajouter aux favoris">
           ♥
         </button>
       </ng-template>
@@ -219,35 +167,21 @@
 </ng-template>
 
 <!-- PARTIE SUGGESTIONS DES PRODUITS -->
-<section
-  class="details-suggestions"
-  *ngIf="suggestedProducts && suggestedProducts.length"
->
+<section class="details-suggestions" *ngIf="suggestedProducts && suggestedProducts.length">
   <h2 class="details-suggestions__title">Vous pourriez aussi aimer</h2>
 
   <div class="details-suggestions__grid">
     <article class="suggest-card" *ngFor="let sp of suggestedProducts">
       <div class="suggest-card__image-wrapper">
-        <img
-          [src]="sp.images[0]"
-          [alt]="sp.name"
-          class="suggest-card__image"
-        />
+        <img [src]="getImageUrl(sp.images[0] || '')" [alt]="sp.name" class="suggest-card__image" />
 
         <!-- overlay actions au hover -->
         <div class="suggest-card__overlay">
-          <button
-            type="button"
-            class="suggest-card__icon-btn"
-            (click)="addSuggestedToCart(sp); $event.stopPropagation()"
-          >
+          <button type="button" class="suggest-card__icon-btn"
+            (click)="addSuggestedToCart(sp); $event.stopPropagation()">
             <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
           </button>
-          <button
-            type="button"
-            class="suggest-card__icon-btn"
-            (click)="goToProduct(sp.id); $event.stopPropagation()"
-          >
+          <button type="button" class="suggest-card__icon-btn" (click)="goToProduct(sp.id); $event.stopPropagation()">
             <img src="assets/icons/oeil.svg" alt="Voir les détails" />
           </button>
         </div>

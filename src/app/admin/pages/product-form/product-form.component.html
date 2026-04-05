@@ -1,0 +1,565 @@
+<div class="product-form-container">
+    <div class="form-header">
+        <h1 class="form-title">{{ isEditMode ? 'Modifier' : 'Ajouter' }} un Produit</h1>
+        <a routerLink="/admin/products" class="btn-back">
+            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Retour
+        </a>
+    </div>
+
+    <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="product-form">
+        <!-- Message de statut -->
+        <div *ngIf="statusMessage" class="status-msg" [ngClass]="'status-msg--' + statusType">
+            {{ statusMessage }}
+        </div>
+
+        <!-- Informations de base -->
+        <div class="form-section">
+            <h2 class="section-title">Informations de base</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Nom du produit *</label>
+                    <input type="text" formControlName="name" class="form-input"
+                        [class.is-invalid]="productForm.get('name')?.invalid && productForm.get('name')?.touched"
+                        placeholder="Ex: T-shirt Premium">
+                    <div class="error-msg" *ngIf="productForm.get('name')?.invalid && productForm.get('name')?.touched">
+                        Le nom est obligatoire.
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Marque</label>
+                    <input type="text" formControlName="brand" class="form-input" placeholder="Ex: Saty Collection">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Description *</label>
+                <textarea formControlName="description" rows="4" class="form-textarea"
+                    [class.is-invalid]="productForm.get('description')?.invalid && productForm.get('description')?.touched"
+                    placeholder="Décrivez le produit..."></textarea>
+                <div class="error-msg"
+                    *ngIf="productForm.get('description')?.invalid && productForm.get('description')?.touched">
+                    La description est obligatoire.
+                </div>
+            </div>
+
+            <div class="form-row form-row-3">
+                <div class="form-group">
+                    <label class="form-label">Prix (FCFA) *</label>
+                    <input type="number" formControlName="price" class="form-input"
+                        [class.is-invalid]="productForm.get('price')?.invalid && productForm.get('price')?.touched"
+                        placeholder="0">
+                    <div class="error-msg"
+                        *ngIf="productForm.get('price')?.invalid && productForm.get('price')?.touched">
+                        Prix valide obligatoire.
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Ancien Prix (Optionnel)</label>
+                    <input type="number" formControlName="oldPrice" class="form-input" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Stock Global *</label>
+                    <input type="number" formControlName="stock" class="form-input"
+                        [class.is-invalid]="productForm.get('stock')?.invalid && productForm.get('stock')?.touched"
+                        placeholder="0">
+                    <div class="error-msg"
+                        *ngIf="productForm.get('stock')?.invalid && productForm.get('stock')?.touched">
+                        Stock obligatoire (min 0).
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Catégorie *</label>
+                <select formControlName="categoryId" class="form-select"
+                    [class.is-invalid]="productForm.get('categoryId')?.invalid && productForm.get('categoryId')?.touched">
+                    <option value="">Sélectionner une catégorie</option>
+                    <option *ngFor="let cat of categories$ | async" [value]="cat.id">{{ cat.name }}</option>
+                </select>
+                <div class="error-msg"
+                    *ngIf="productForm.get('categoryId')?.invalid && productForm.get('categoryId')?.touched">
+                    Veuillez choisir une catégorie.
+                </div>
+            </div>
+        </div>
+
+        <!-- Images -->
+        <div class="form-section">
+            <h2 class="section-title">Images du produit</h2>
+
+            <div class="form-group">
+                <label class="form-label">Télécharger des images</label>
+                <input type="file" (change)="onFileChange($event)" multiple accept="image/*" class="form-file">
+                <p class="form-hint">Vous pouvez sélectionner plusieurs images</p>
+            </div>
+
+            <div *ngIf="previewImages.length > 0" class="image-preview-grid">
+                <div *ngFor="let img of previewImages; let i = index" class="image-preview-item">
+                    <img [src]="img" class="preview-image" alt="Aperçu">
+                </div>
+            </div>
+        </div>
+
+        <!-- Variantes -->
+        <div class="form-section">
+            <div class="section-header">
+                <h2 class="section-title">Variantes (Tailles/Couleurs)</h2>
+                <button type="button" (click)="addVariant()" class="btn-add-variant">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Ajouter Variante
+                </button>
+            </div>
+
+            <div formArrayName="variants" class="variants-list">
+                <div *ngFor="let variant of variants.controls; let i=index" [formGroupName]="i" class="variant-item">
+                    <div class="variant-fields">
+                        <div class="form-group-inline">
+                            <label class="form-label-small">Taille</label>
+                            <input type="text" formControlName="size" placeholder="S, M, 42..."
+                                class="form-input-small">
+                        </div>
+                        <div class="form-group-inline">
+                            <label class="form-label-small">Stock</label>
+                            <input type="number" formControlName="stock" placeholder="0" class="form-input-small">
+                        </div>
+                        <div class="form-group-inline">
+                            <label class="form-label-small">Couleur</label>
+                            <input type="text" formControlName="color" placeholder="Rouge..." class="form-input-small">
+                        </div>
+                    </div>
+                    <button type="button" (click)="removeVariant(i)" class="btn-remove-variant">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Options -->
+        <div class="form-section">
+            <h2 class="section-title">Options</h2>
+
+            <div class="form-toggles">
+                <label class="toggle-item">
+                    <input type="checkbox" formControlName="isActive" class="toggle-checkbox">
+                    <span class="toggle-label">En vente</span>
+                </label>
+                <label class="toggle-item">
+                    <input type="checkbox" formControlName="isFeatured" class="toggle-checkbox">
+                    <span class="toggle-label">En promotion / Vedette</span>
+                </label>
+                <label class="toggle-item">
+                    <input type="checkbox" formControlName="isBestSeller" class="toggle-checkbox">
+                    <span class="toggle-label">Meilleures Ventes</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+            <button type="button" routerLink="/admin/products" class="btn-cancel">
+                Annuler
+            </button>
+            <button type="submit" [disabled]="productForm.invalid || submitting" class="btn-submit">
+                {{ submitting ? 'Enregistrement...' : 'Enregistrer' }}
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .product-form-container {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .form-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1a1a1a;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.625rem 1.25rem;
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.5rem;
+        color: #666;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+
+    .btn-back:hover {
+        border-color: #e53935;
+        color: #e53935;
+    }
+
+    .icon {
+        width: 18px;
+        height: 18px;
+    }
+
+    .product-form {
+        background: white;
+        border-radius: 0.75rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        border: 1px solid #f0f0f0;
+    }
+
+    .form-section {
+        padding: 2rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .form-section:last-of-type {
+        border-bottom: none;
+    }
+
+    .section-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 1.5rem;
+    }
+
+    .status-msg {
+        margin: 1rem 2rem;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        text-align: center;
+        animation: slideDown 0.3s ease;
+    }
+
+    .status-msg--success {
+        background: #e8f5e9;
+        color: #2e7d32;
+        border: 1px solid #c8e6c9;
+    }
+
+    .status-msg--error {
+        background: #ffebee;
+        color: #c62828;
+        border: 1px solid #ffcdd2;
+    }
+
+    @keyframes slideDown {
+        from {
+            transform: translateY(-10px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-row-3 {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group:last-child {
+        margin-bottom: 0;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-input,
+    .form-textarea,
+    .form-select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.5rem;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        background: white;
+    }
+
+    .form-input:focus,
+    .form-textarea:focus,
+    .form-select:focus {
+        outline: none;
+        border-color: #e53935;
+        box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.1);
+    }
+
+    .form-textarea {
+        resize: vertical;
+        font-family: inherit;
+    }
+
+    .form-file {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px dashed #e0e0e0;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .form-file:hover {
+        border-color: #e53935;
+        background: rgba(229, 57, 53, 0.02);
+    }
+
+    .form-hint {
+        font-size: 0.8rem;
+        color: #999;
+        margin-top: 0.5rem;
+    }
+
+    .image-preview-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .image-preview-item {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        border: 1px solid #e0e0e0;
+    }
+
+    .preview-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .btn-add-variant {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: #e53935;
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-add-variant:hover {
+        background: #d32f2f;
+        transform: translateY(-1px);
+    }
+
+    .variants-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .variant-item {
+        display: flex;
+        align-items: flex-end;
+        gap: 1rem;
+        padding: 1rem;
+        background: #f9f9f9;
+        border-radius: 0.5rem;
+        border: 1px solid #e0e0e0;
+    }
+
+    .variant-fields {
+        flex: 1;
+        display: flex;
+        gap: 1rem;
+    }
+
+    .form-group-inline {
+        flex: 1;
+    }
+
+    .form-label-small {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #666;
+        margin-bottom: 0.375rem;
+    }
+
+    .form-input-small {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+    }
+
+    .form-input-small:focus {
+        outline: none;
+        border-color: #e53935;
+    }
+
+    .btn-remove-variant {
+        padding: 0.5rem;
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.375rem;
+        color: #e53935;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-remove-variant:hover {
+        background: #ffebee;
+        border-color: #e53935;
+    }
+
+    .form-toggles {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .toggle-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        cursor: pointer;
+    }
+
+    .toggle-checkbox {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        accent-color: #e53935;
+    }
+
+    .toggle-label {
+        font-size: 0.95rem;
+        color: #333;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding: 1.5rem 2rem;
+        background: #f9f9f9;
+        border-radius: 0 0 0.75rem 0.75rem;
+    }
+
+    .btn-cancel {
+        padding: 0.75rem 1.5rem;
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.5rem;
+        color: #666;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-cancel:hover {
+        border-color: #999;
+        color: #333;
+    }
+
+    .btn-submit {
+        padding: 0.75rem 2rem;
+        background: #e53935;
+        border: none;
+        border-radius: 0.5rem;
+        color: white;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+        background: #d32f2f;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(229, 57, 53, 0.3);
+    }
+
+    .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .form-input.is-invalid,
+    .form-textarea.is-invalid,
+    .form-select.is-invalid {
+        border-color: #e53935;
+        background: #fffafa;
+    }
+
+    .error-msg {
+        color: #e53935;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+
+        .form-row,
+        .form-row-3 {
+            grid-template-columns: 1fr;
+        }
+
+        .variant-fields {
+            flex-direction: column;
+        }
+
+        .form-toggles {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+</style>

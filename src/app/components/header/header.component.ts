@@ -6,6 +6,8 @@ import { FormsModule } from '@angular/forms';
 import { CartService } from '../../services/cart.service';
 import { FavoritesService } from '../../services/favorites.service';
 import { AuthService } from '../../services/auth.service';
+import { InboxService } from '../../services/inbox.service';
+import { CategoryService, Category } from '../../services/category.service';
 import { User } from '../../models/user.model';
 
 interface ProductSuggestion {
@@ -27,6 +29,7 @@ export class HeaderComponent {
   showCategories = false;
   showAccountMenu = false;
   showHelpMenu = false;
+  categories: Category[] = [];
 
   searchQuery = '';
 
@@ -162,8 +165,48 @@ export class HeaderComponent {
     private router: Router,
     public cartService: CartService,
     public favoritesService: FavoritesService,
-    private authService: AuthService
-  ) {}
+    public inboxService: InboxService,
+    private authService: AuthService,
+    private categoryService: CategoryService
+  ) {
+    this.loadCategories();
+    
+    // Start notification polling when authenticated
+    this.authService.currentUser$.subscribe(user => {
+      if (user) {
+        this.inboxService.startPolling();
+        this.inboxService.getUnreadCount().subscribe();
+      } else {
+        this.inboxService.reset();
+      }
+    });
+  }
+
+  private loadCategories(): void {
+    this.categoryService.getCategories().subscribe({
+      next: (categories) => {
+        this.categories = categories;
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des catégories dans le header:', err);
+      }
+    });
+  }
+
+  getCategoryIcon(slug: string): string {
+    const iconMap: { [key: string]: string } = {
+      'boubous-hommes': 'assets/icons/boubou-men.svg',
+      'boubous-femmes': 'assets/icons/boubou-women.svg',
+      'chaussures': 'assets/icons/shoes.svg',
+      'tuniques': 'assets/icons/tunic.svg',
+      'chapeaux': 'assets/icons/hat.svg',
+      'accessoires': 'assets/icons/accessory.svg',
+      'robes': 'assets/icons/robes.svg', // Fallback
+      'ensembles': 'assets/icons/ensembles.svg', // Fallback
+      'chemises': 'assets/icons/chemises.svg' // Fallback
+    };
+    return iconMap[slug] || 'assets/icons/accessory.svg';
+  }
 
   /* --- Écouter les clics en dehors pour fermer les dropdowns --- */
   @HostListener('document:click', ['$event'])
@@ -185,7 +228,12 @@ export class HeaderComponent {
   }
 
   get greetingName(): string {
-    return this.currentUser?.fullName || this.currentUser?.name || '';
+    if (!this.currentUser) return '';
+    return `${this.currentUser.firstName} ${this.currentUser.lastName}`;
+  }
+
+  get isAdmin(): boolean {
+    return this.currentUser?.role === 'admin';
   }
 
   logout(): void {
@@ -249,7 +297,7 @@ export class HeaderComponent {
   onSearch(): void {
     const query = this.searchQuery?.trim();
     if (!query) return;
-    
+
     this.showSuggestions = false;
     this.router.navigate(['/recherche'], { queryParams: { q: query } });
   }
@@ -268,6 +316,9 @@ export class HeaderComponent {
       this.router.navigate(['/connexion'], {
         queryParams: { redirect: currentUrl },
       });
+    } else if (this.isAdmin) {
+      // Rediriger les admins vers le dashboard admin
+      this.router.navigate(['/admin/dashboard']);
     } else {
       this.router.navigate(['/mon-compte']);
     }
@@ -281,6 +332,8 @@ export class HeaderComponent {
       this.router.navigate(['/connexion'], {
         queryParams: { redirect: '/mon-compte' },
       });
+    } else if (this.isAdmin) {
+      this.router.navigate(['/admin/dashboard']);
     } else {
       this.router.navigate(['/mon-compte']);
     }
@@ -292,6 +345,8 @@ export class HeaderComponent {
       this.router.navigate(['/connexion'], {
         queryParams: { redirect: '/commandes' },
       });
+    } else if (this.isAdmin) {
+      this.router.navigate(['/admin/commandes']);
     } else {
       this.router.navigate(['/commandes']);
     }

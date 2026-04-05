@@ -16,36 +16,20 @@
   <!-- Filtres & Tri -->
   <div class="categorie__filters" *ngIf="filteredProducts.length > 0">
     <span class="categorie__filters-label">Trier par :</span>
-    <button
-      type="button"
-      class="filter-btn"
-      [class.filter-btn--active]="activeSortType === 'default'"
-      (click)="sortBy('default')"
-    >
+    <button type="button" class="filter-btn" [class.filter-btn--active]="activeSortType === 'default'"
+      (click)="sortBy('default')">
       Par défaut
     </button>
-    <button
-      type="button"
-      class="filter-btn"
-      [class.filter-btn--active]="activeSortType === 'price-asc'"
-      (click)="sortBy('price-asc')"
-    >
+    <button type="button" class="filter-btn" [class.filter-btn--active]="activeSortType === 'price-asc'"
+      (click)="sortBy('price-asc')">
       Prix croissant
     </button>
-    <button
-      type="button"
-      class="filter-btn"
-      [class.filter-btn--active]="activeSortType === 'price-desc'"
-      (click)="sortBy('price-desc')"
-    >
+    <button type="button" class="filter-btn" [class.filter-btn--active]="activeSortType === 'price-desc'"
+      (click)="sortBy('price-desc')">
       Prix décroissant
     </button>
-    <button
-      type="button"
-      class="filter-btn"
-      [class.filter-btn--active]="activeSortType === 'name-asc'"
-      (click)="sortBy('name-asc')"
-    >
+    <button type="button" class="filter-btn" [class.filter-btn--active]="activeSortType === 'name-asc'"
+      (click)="sortBy('name-asc')">
       Nom A-Z
     </button>
   </div>
@@ -63,7 +47,7 @@
   <!-- Aucun produit -->
   <div class="categorie__empty" *ngIf="category && filteredProducts.length === 0">
     <div class="categorie__empty-icon">📦</div>
-    <h2>Aucun produit disponible</h2>
+    <h2>Aucun produit dans cette catégorie</h2>
     <p>Cette catégorie ne contient pas encore de produits.</p>
     <button class="btn btn--primary" routerLink="/">
       Découvrir d'autres produits
@@ -74,42 +58,26 @@
   <section class="categorie__products" *ngIf="filteredProducts.length > 0">
     <article class="product-card" *ngFor="let product of filteredProducts">
       <div class="product-card__image-wrapper">
-        <img
-          [src]="product.image"
-          [alt]="product.name"
-          class="product-card__image"
-        />
+        <img [src]="getImageUrl(product.images)" [alt]="product.name" class="product-card__image" />
 
         <!-- Overlay avec favoris + panier + œil -->
         <div class="product-card__overlay">
           <!-- Favoris -->
-          <button
-            type="button"
-            class="product-card__icon-btn product-card__icon-btn--heart"
+          <button type="button" class="product-card__icon-btn product-card__icon-btn--heart"
             [class.product-card__icon-btn--favorite]="favoritesService.isFavorite(product.id)"
-            (click)="toggleFavorite(product); $event.stopPropagation()"
-            title="Ajouter aux favoris"
-          >
+            (click)="toggleFavorite(product); $event.stopPropagation()" title="Ajouter aux favoris">
             ❤️
           </button>
 
           <!-- Panier -->
-          <button
-            type="button"
-            class="product-card__icon-btn"
-            (click)="addToCart(product); $event.stopPropagation()"
-            title="Ajouter au panier"
-          >
+          <button type="button" class="product-card__icon-btn" (click)="addToCart(product); $event.stopPropagation()"
+            title="Ajouter au panier">
             <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
           </button>
 
           <!-- Détails -->
-          <button
-            type="button"
-            class="product-card__icon-btn"
-            (click)="goToProduct(product.id); $event.stopPropagation()"
-            title="Voir les détails"
-          >
+          <button type="button" class="product-card__icon-btn"
+            (click)="goToProduct(product.id); $event.stopPropagation()" title="Voir les détails">
             <img src="assets/icons/oeil.svg" alt="Voir les détails" />
           </button>
         </div>

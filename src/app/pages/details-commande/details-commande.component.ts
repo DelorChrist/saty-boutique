@@ -6,6 +6,9 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { OrdersService } from '../../services/orders.service';
 import { AuthService } from '../../services/auth.service';
 import { Order, OrderStatus } from '../../models/order.model';
+import { ToastService } from '../../services/toast.service';
+import { ConfirmDialogService } from '../../services/confirm-dialog.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-details-commande',
@@ -26,6 +29,8 @@ export class DetailsCommandeComponent implements OnInit {
     private router: Router,
     private ordersService: OrdersService,
     private authService: AuthService,
+    private toastService: ToastService,
+    private confirmService: ConfirmDialogService
   ) {}
 
   ngOnInit(): void {
@@ -49,52 +54,49 @@ export class DetailsCommandeComponent implements OnInit {
 
   private loadOrder(): void {
     if (!this.orderId) return;
-
-    this.order = this.ordersService.getOrderById(this.orderId);
-
-    console.log('ORDER DETAILS = ', this.order);
-
-    if (!this.order) {
-      alert('Commande introuvable');
-      this.router.navigate(['/commandes']);
-      return;
-    }
-
-    this.canCancel = this.ordersService.canCancelOrder(this.order);
-    this.canReturn = this.ordersService.canReturnOrder(this.order);
+    this.ordersService.getOrderById(this.orderId).subscribe({
+      next: (order: Order) => {
+        this.order = order;
+        this.canCancel = this.ordersService.canCancelOrder(order);
+        this.canReturn = this.ordersService.canReturnOrder(order);
+      },
+      error: () => {
+        this.toastService.error('Commande introuvable');
+        this.router.navigate(['/commandes']);
+      }
+    });
   }
 
   /* ========== ACTIONS ========== */
 
-  onCancelOrder(): void {
+  async onCancelOrder(): Promise<void> {
     if (!this.order) return;
 
-    const confirmed = confirm(
+    const confirmed = await this.confirmService.confirm(
       `Voulez-vous vraiment annuler la commande #${this.order.id} ?\n\nCette action est irréversible.`,
+      'Annuler la commande',
+      { confirmText: 'Annuler la commande', cancelText: 'Retour', type: 'danger' }
     );
 
     if (!confirmed) return;
 
-    const reason = prompt("Raison de l'annulation (optionnel) :");
-
-    const success = this.ordersService.cancelOrder(
-      this.order.id,
-      reason || undefined,
-    );
-
-    if (success) {
-      alert('Commande annulée avec succès');
-      this.loadOrder();
-    } else {
-      alert("Impossible d'annuler cette commande");
-    }
+    this.ordersService.cancelOrder(this.order.id).subscribe({
+      next: () => {
+        this.toastService.success('Commande annulée avec succès');
+        this.loadOrder();
+      },
+      error: (err: any) => {
+        this.toastService.error(err.error?.message || "Impossible d'annuler cette commande");
+      }
+    });
   }
 
   onRequestReturn(): void {
     if (!this.order) return;
 
-    alert(
-      'Demande de retour enregistrée !\n\nNotre équipe vous contactera sous 24h pour organiser le retour.',
+    this.toastService.success(
+      'Demande de retour enregistrée ! Notre équipe vous contactera sous 24h pour organiser le retour.',
+      5000
     );
   }
 
@@ -250,6 +252,12 @@ export class DetailsCommandeComponent implements OnInit {
   }
 
   downloadInvoice(): void {
-    alert('Téléchargement de la facture (fonctionnalité à venir)');
+    this.toastService.info('Téléchargement de la facture (fonctionnalité à venir)');
+  }
+
+  getImageUrl(imagePath: string): string {
+    if (!imagePath) return '/assets/placeholder.jpg';
+    if (imagePath.startsWith('http')) return imagePath;
+    return `${environment.mediaUrl}${imagePath}`;
   }
 }

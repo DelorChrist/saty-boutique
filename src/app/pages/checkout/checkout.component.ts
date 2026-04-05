@@ -4,7 +4,11 @@ import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CartService, CartItem } from '../../services/cart.service';
 import { OrdersService } from '../../services/orders.service';
-import { OrderItem } from '../../models/order.model';
+import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../services/toast.service';
+import { PromoService } from '../../services/promo.service';
+import { Order, OrderItem } from '../../models/order.model';
+import { environment } from '../../../environments/environment';
 
 interface DeliveryInfo {
   firstName: string;
@@ -66,11 +70,18 @@ export class CheckoutComponent implements OnInit {
 
   // contrôle de l’ouverture de la section paiement
   showPaymentSection = false;
-
+  // Code promo
+  promoCode = '';
+  appliedPromo: any = null;
+  isValidatingPromo = false;
+  promoError = '';
   constructor(
     public cartService: CartService,
     private ordersService: OrdersService,
+    private authService: AuthService,
     private router: Router,
+    private toastService: ToastService,
+    private promoService: PromoService
   ) {}
 
   ngOnInit(): void {
@@ -98,7 +109,6 @@ export class CheckoutComponent implements OnInit {
         this.deliveryInfo.commune = addr.commune || '';
         this.deliveryInfo.city = addr.city || 'Abidjan';
       } catch {
-        // ignore si invalide
       }
     }
   }
@@ -140,8 +150,19 @@ export class CheckoutComponent implements OnInit {
     return this.deliveryInfo.commune ? this.calculateDeliveryFee() : 0;
   }
 
+  get discount(): number {
+    if (!this.appliedPromo) return 0;
+    
+    const subtotalAmount = this.subtotal;
+    
+    if (this.appliedPromo.type === 'percentage') {
+      return Math.round((subtotalAmount * this.appliedPromo.discount) / 100);
+    }
+    return this.appliedPromo.discount;
+  }
+
   get total(): number {
-    return this.subtotal + this.shippingCost;
+    return Math.max(0, this.subtotal + this.shippingCost - this.discount);
   }
 
   // validation uniquement de la partie "livraison"
@@ -166,10 +187,41 @@ export class CheckoutComponent implements OnInit {
 
   openPaymentSection(): void {
     if (!this.isDeliveryValid()) {
-      alert('Veuillez compléter les informations de livraison avant de continuer.');
+      this.toastService.warning('Veuillez compléter les informations de livraison avant de continuer.');
       return;
     }
     this.showPaymentSection = true;
+  }
+
+  applyPromoCode(): void {
+    if (!this.promoCode.trim()) {
+      this.promoError = 'Veuillez entrer un code promo';
+      return;
+    }
+
+    this.isValidatingPromo = true;
+    this.promoError = '';
+
+    this.promoService.validatePromoCode(this.promoCode.trim(), this.subtotal).subscribe({
+      next: (promo) => {
+        this.isValidatingPromo = false;
+        this.appliedPromo = promo;
+        this.toastService.success(`Code promo "${this.promoCode}" appliqué ! Réduction de ${this.promoService.getDiscountText(promo)}`);
+        this.promoError = '';
+      },
+      error: (err) => {
+        this.isValidatingPromo = false;
+        this.promoError = err.error?.message || 'Code promo invalide';
+        this.appliedPromo = null;
+      }
+    });
+  }
+
+  removePromo(): void {
+    this.appliedPromo = null;
+    this.promoCode = '';
+    this.promoError = '';
+    this.toastService.info('Code promo retiré');
   }
 
   private buildOrderItems(): OrderItem[] {
@@ -187,37 +239,54 @@ export class CheckoutComponent implements OnInit {
 
   async submitOrder(): Promise<void> {
     if (!this.isFormValid()) {
-      alert('Veuillez remplir tous les champs obligatoires correctement');
+      this.toastService.warning('Veuillez remplir tous les champs obligatoires correctement');
+      return;
+    }
+
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/connexion'], {
+        queryParams: { redirect: '/checkout' },
+      });
       return;
     }
 
     this.isSubmitting = true;
+    const items = this.buildOrderItems();
 
-    setTimeout(() => {
-      const items = this.buildOrderItems();
+    this.ordersService.createOrder({
+      items,
+      shippingAddress: {
+        fullName: `${this.deliveryInfo.firstName} ${this.deliveryInfo.lastName}`,
+        phone: this.deliveryInfo.phone,
+        address: this.deliveryInfo.address,
+        city: this.deliveryInfo.city,
+        district: this.deliveryInfo.commune,
+      },
+      paymentMethod: this.selectedPaymentMethod === 'cash' ? 'cash' : 'mobile_money',
+      customerNote: this.deliveryInfo.additionalInfo || undefined,
+      discount: this.discount,
+      shippingCost: this.shippingCost,
+      promoCode: this.appliedPromo?.code || undefined,
+    }).subscribe({
+      next: (order: Order) => {
+        this.cartService.clearCart();
+        this.isSubmitting = false;
+        this.toastService.success(
+          `Commande ${order.id} validée ! Vous allez recevoir un email de confirmation à ${this.deliveryInfo.email}`,
+          7000
+        );
+        this.router.navigate(['/commandes']);
+      },
+      error: (err: any) => {
+        this.isSubmitting = false;
+        this.toastService.error(err.error?.message || 'Erreur lors de la creation de la commande');
+      }
+    });
+  }
 
-      const order = this.ordersService.createOrder({
-        items,
-        shippingAddress: {
-          fullName: `${this.deliveryInfo.firstName} ${this.deliveryInfo.lastName}`,
-          phone: this.deliveryInfo.phone,
-          address: this.deliveryInfo.address,
-          city: this.deliveryInfo.city,
-          district: this.deliveryInfo.commune,
-        },
-        paymentMethod:
-          this.selectedPaymentMethod === 'cash' ? 'cash' : 'mobile_money',
-        customerNote: this.deliveryInfo.additionalInfo || undefined,
-        discount: 0,
-      });
-
-      this.cartService.clearCart();
-      this.isSubmitting = false;
-
-      alert(
-        `Commande ${order.id} validée ! Vous allez recevoir un email de confirmation à ${this.deliveryInfo.email}`,
-      );
-      this.router.navigate(['/commandes']);
-    }, 2000);
+  getImageUrl(imagePath: string): string {
+    if (!imagePath) return '/assets/placeholder.jpg';
+    if (imagePath.startsWith('http')) return imagePath;
+    return `${environment.mediaUrl}${imagePath}`;
   }
 }

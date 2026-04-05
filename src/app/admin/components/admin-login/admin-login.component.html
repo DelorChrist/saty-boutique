@@ -1,0 +1,385 @@
+<div class="admin-login-page">
+  <div class="login-container">
+    <!-- Logo et titre -->
+    <div class="login-header">
+      <div class="login-logo">
+        <span class="logo-text">Saty <span class="logo-accent">Admin</span></span>
+      </div>
+      <h1 class="login-title">Administration Saty Boutique</h1>
+      <p class="login-subtitle">Connexion à l'espace administrateur</p>
+    </div>
+
+    <!-- Formulaire de connexion -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <!-- Message d'erreur -->
+      <div class="alert alert-error" *ngIf="errorMessage">
+        <svg class="alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <!-- Champ email -->
+      <div class="form-group">
+        <label for="email" class="form-label">Email administrateur</label>
+        <input id="email" type="email" formControlName="email" class="form-input"
+          [class.form-input-error]="emailControl?.invalid && emailControl?.touched" placeholder="admin@satyboutique.com"
+          autocomplete="email" />
+        <span class="form-error" *ngIf="emailControl?.invalid && emailControl?.touched">
+          <span *ngIf="emailControl?.errors?.['required']">Email requis</span>
+          <span *ngIf="emailControl?.errors?.['email']">Email invalide</span>
+        </span>
+      </div>
+
+      <!-- Champ mot de passe -->
+      <div class="form-group">
+        <label for="password" class="form-label">Mot de passe</label>
+        <div class="password-field">
+          <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password" class="form-input"
+            [class.form-input-error]="passwordControl?.invalid && passwordControl?.touched" placeholder="••••••••"
+            autocomplete="current-password" />
+          <button type="button" class="password-toggle" (click)="togglePasswordVisibility()"
+            [attr.aria-label]="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'">
+            <svg *ngIf="!showPassword" class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            <svg *ngIf="showPassword" class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+            </svg>
+          </button>
+        </div>
+        <span class="form-error" *ngIf="passwordControl?.invalid && passwordControl?.touched">
+          <span *ngIf="passwordControl?.errors?.['required']">Mot de passe requis</span>
+          <span *ngIf="passwordControl?.errors?.['minlength']">Min. 6 caractères</span>
+        </span>
+      </div>
+
+      <!-- Se souvenir de moi -->
+      <div class="form-checkbox">
+        <input id="rememberMe" type="checkbox" formControlName="rememberMe" />
+        <label for="rememberMe">Se souvenir de moi</label>
+      </div>
+
+      <!-- Bouton de connexion -->
+      <button type="submit" class="btn-login" [disabled]="loading || loginForm.invalid">
+        <span *ngIf="!loading">Se connecter</span>
+        <span *ngIf="loading" class="loading-spinner">
+          <svg class="spinner" viewBox="0 0 24 24">
+            <circle class="spinner-circle" cx="12" cy="12" r="10" fill="none" stroke-width="3" />
+          </svg>
+          Connexion en cours...
+        </span>
+      </button>
+    </form>
+
+    <!-- Comptes de test -->
+    <div class="test-accounts">
+      <p class="test-accounts-title">🔑 Comptes de test :</p>
+      <div class="test-accounts-list">
+        <div class="test-account">
+          <strong>Admin:</strong> admin&#64;satyboutique.com / admin123
+        </div>
+        <div class="test-account">
+          <strong>Gestionnaire:</strong> manager&#64;satyboutique.com / manager123
+        </div>
+      </div>
+    </div>
+
+    <!-- Lien retour -->
+    <div class="login-footer">
+      <a href="/" class="link-back">
+        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Retour au site
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .admin-login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    padding: 2rem;
+  }
+
+  .login-container {
+    width: 100%;
+    max-width: 440px;
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    padding: 2.5rem;
+  }
+
+  .login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .login-logo {
+    margin-bottom: 1rem;
+  }
+
+  .logo-text {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #1a1a1a;
+  }
+
+  .logo-accent {
+    color: #e53935;
+  }
+
+  .login-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
+  }
+
+  .login-subtitle {
+    color: #666;
+    font-size: 0.95rem;
+  }
+
+  .login-form {
+    margin-bottom: 2rem;
+  }
+
+  .alert {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  .alert-error {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ef9a9a;
+  }
+
+  .alert-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 0.5rem;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: #e53935;
+    box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.1);
+  }
+
+  .form-input-error {
+    border-color: #e53935;
+  }
+
+  .password-field {
+    position: relative;
+  }
+
+  .password-toggle {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #999;
+    padding: 0.25rem;
+    transition: color 0.2s ease;
+  }
+
+  .password-toggle:hover {
+    color: #e53935;
+  }
+
+  .icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .form-error {
+    display: block;
+    color: #e53935;
+    font-size: 0.8rem;
+    margin-top: 0.375rem;
+  }
+
+  .form-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #e53935;
+  }
+
+  .form-checkbox label {
+    font-size: 0.9rem;
+    color: #666;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .btn-login {
+    width: 100%;
+    padding: 0.875rem;
+    background: #e53935;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .btn-login:hover:not(:disabled) {
+    background: #d32f2f;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(229, 57, 53, 0.4);
+  }
+
+  .btn-login:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .loading-spinner {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .spinner {
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+  }
+
+  .spinner-circle {
+    stroke: white;
+    stroke-dasharray: 50;
+    stroke-dashoffset: 0;
+    animation: dash 1.5s ease-in-out infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes dash {
+    0% {
+      stroke-dashoffset: 50;
+    }
+
+    50% {
+      stroke-dashoffset: 12.5;
+    }
+
+    100% {
+      stroke-dashoffset: 50;
+    }
+  }
+
+  .test-accounts {
+    background: #f9f9f9;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .test-accounts-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 0.75rem;
+  }
+
+  .test-accounts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .test-account {
+    font-size: 0.85rem;
+    color: #666;
+    padding: 0.5rem;
+    background: white;
+    border-radius: 0.375rem;
+  }
+
+  .test-account strong {
+    color: #e53935;
+  }
+
+  .login-footer {
+    text-align: center;
+  }
+
+  .link-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
+  }
+
+  .link-back:hover {
+    color: #e53935;
+  }
+</style>

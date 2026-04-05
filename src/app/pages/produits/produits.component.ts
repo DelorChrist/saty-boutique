@@ -2,15 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { CartService } from '../../services/cart.service';
-
-interface Product {
-  id: string;          // ✅ string
-  name: string;
-  price: number;
-  image: string;
-  categorySlug: string;
-  isNew?: boolean;
-}
+import { ProductService, Product } from '../../services/product.service';
+import { CategoryService, Category } from '../../services/category.service';
+import { environment } from '../../../environments/environment';
+import { ToastService } from '../../services/toast.service';
 
 type SortType = 'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
 
@@ -25,65 +20,61 @@ export class ProduitsComponent implements OnInit {
   allProducts: Product[] = [];
   filteredProducts: Product[] = [];
   displayedProducts: Product[] = [];
-  
+
   activeSortType: SortType = 'default';
   selectedCategory: string = 'all';
-  
+  loading = true;
+
   // Pagination
   currentPage: number = 1;
   itemsPerPage: number = 12;
   totalPages: number = 1;
 
-  // Catégories pour le filtre
-  categories = [
-    { slug: 'all', name: 'Toutes catégories' },
-    { slug: 'boubous-hommes', name: 'Boubous Hommes' },
-    { slug: 'boubous-femmes', name: 'Boubous Femmes' },
-    { slug: 'robes', name: 'Robes' },
-    { slug: 'ensembles', name: 'Ensembles' },
-    { slug: 'chemises', name: 'Chemises' },
-    { slug: 'chaussures', name: 'Chaussures' },
-    { slug: 'tuniques', name: 'Tuniques' },
-    { slug: 'chapeaux', name: 'Chapeaux' },
-    { slug: 'accessoires', name: 'Accessoires' },
+  // Catégories dynamiques
+  categories: Array<{ slug: string, name: string }> = [
+    { slug: 'all', name: 'Toutes catégories' }
   ];
 
   constructor(
     private router: Router,
     private cartService: CartService,
-  ) {}
+    private productService: ProductService,
+    private categoryService: CategoryService,
+    private toastService: ToastService
+  ) { }
 
   ngOnInit(): void {
+    this.loadCategories();
     this.loadProducts();
-    this.applyFilters();
+  }
+
+  private loadCategories(): void {
+    this.categoryService.getCategories().subscribe({
+      next: (categories) => {
+        this.categories = [
+          { slug: 'all', name: 'Toutes catégories' },
+          ...categories.map(cat => ({ slug: cat.slug, name: cat.name }))
+        ];
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des catégories:', err);
+      }
+    });
   }
 
   private loadProducts(): void {
-    // MOCK produits (à remplacer par service/Firebase)
-    this.allProducts = [
-      { id: 'p1', name: 'Chemise moderne',        price: 25000, image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80', categorySlug: 'chemises',        isNew: true },
-      { id: 'p2', name: 'Robe africaine élégante',price: 35000, image: 'https://images.unsplash.com/photo-1514996937319-344454492b37?auto=format&fit=crop&w=900&q=80', categorySlug: 'robes' },
-      { id: 'p3', name: 'Ensemble pagne',         price: 40000, image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=900&q=80', categorySlug: 'ensembles' },
-      { id: 'p4', name: 'Boubou élégant',         price: 32000, image: 'https://images.unsplash.com/photo-1490111718993-d98654ce6cf7?auto=format&fit=crop&w=900&q=80', categorySlug: 'boubous-hommes' },
-      { id: 'p5', name: 'Tenue de soirée',        price: 45000, image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=900&q=80', categorySlug: 'robes' },
-      { id: 'p6', name: 'Ensemble casual',        price: 28000, image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80', categorySlug: 'ensembles' },
-      { id: 'p7', name: 'Boubou wax premium',     price: 38000, image: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80', categorySlug: 'boubous-hommes', isNew: true },
-      { id: 'p8', name: 'Boubou brodé',           price: 42000, image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=900&q=80', categorySlug: 'boubous-hommes' },
-      { id: 'p9', name: 'Robe pagne',             price: 30000, image: 'https://images.unsplash.com/photo-1514996937319-344454492b37?auto=format&fit=crop&w=900&q=80', categorySlug: 'robes' },
-      { id: 'p10',name: 'Robe de soirée',         price: 50000, image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=900&q=80', categorySlug: 'robes' },
-      { id: 'p11',name: 'Ensemble bazin',         price: 55000, image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80', categorySlug: 'ensembles' },
-      { id: 'p12',name: 'Ensemble casual',        price: 32000, image: 'https://images.unsplash.com/photo-1490111718993-d98654ce6cf7?auto=format&fit=crop&w=900&q=80', categorySlug: 'ensembles' },
-      { id: 'p13',name: 'Sac assorti',            price: 18000, image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=900&q=80', categorySlug: 'accessoires' },
-      { id: 'p14',name: 'Accessoires wax',        price: 15000, image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=900&q=80', categorySlug: 'accessoires',     isNew: true },
-      { id: 'p15',name: 'Boubou femme wax',       price: 36000, image: 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=900&q=80', categorySlug: 'boubous-femmes' },
-      { id: 'p16',name: 'Boubou femme brodé',     price: 42000, image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=900&q=80', categorySlug: 'boubous-femmes' },
-      { id: 'p17',name: 'Chaussures traditionnelles', price: 22000, image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=80', categorySlug: 'chaussures' },
-      { id: 'p18',name: 'Sandales wax',           price: 18000, image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=900&q=80', categorySlug: 'chaussures' },
-      { id: 'p19',name: 'Tunique légère',         price: 28000, image: 'https://images.unsplash.com/photo-1490111718993-d98654ce6cf7?auto=format&fit=crop&w=900&q=80', categorySlug: 'tuniques' },
-      { id: 'p20',name: 'Chapeau traditionnel',   price: 12000, image: 'https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=900&q=80', categorySlug: 'chapeaux' },
-      { id: 'p21',name: 'Tunique brodée',         price: 32000, image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80', categorySlug: 'tuniques' },
-      { id: 'p22',name: 'Chapeau moderne',        price: 15000, image: 'https://images.unsplash.com/photo-1529958030586-3aae4ca485ff?auto=format&fit=crop&w=900&q=80', categorySlug: 'chapeaux' },
-    ];
+    this.loading = true;
+    this.productService.getProducts().subscribe({
+      next: (products) => {
+        this.allProducts = products;
+        this.applyFilters();
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des produits:', err);
+        this.loading = false;
+      }
+    });
   }
 
   private applyFilters(): void {
@@ -92,7 +83,7 @@ export class ProduitsComponent implements OnInit {
       this.filteredProducts = [...this.allProducts];
     } else {
       this.filteredProducts = this.allProducts.filter(
-        p => p.categorySlug === this.selectedCategory,
+        p => p.category?.slug === this.selectedCategory,
       );
     }
 
@@ -155,15 +146,25 @@ export class ProduitsComponent implements OnInit {
 
   addToCart(product: Product): void {
     this.cartService.addItem({
-      productId: product.id,  // ✅ string
+      productId: product.id,
       name: product.name,
       price: product.price,
-      image: product.image,
+      image: product.images[0] || '/assets/placeholder.jpg',
       size: null,
       color: null,
       quantity: 1,
     });
 
-    alert(`${product.name} ajouté au panier !`);
+    this.toastService.success(`${product.name} ajouté au panier !`);
+  }
+
+  getImageUrl(images: string[]): string {
+    if (!images || images.length === 0) {
+      return '/assets/placeholder.jpg';
+    }
+    if (images[0].startsWith('http')) {
+      return images[0];
+    }
+    return `${environment.mediaUrl}${images[0]}`;
   }
 }

@@ -1,117 +1,137 @@
 // auth.service.ts
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, BehaviorSubject, tap, map, catchError, of } from 'rxjs';
 import { User } from '../models/user.model';
+import { PromoService } from './promo.service';
+import { InboxService } from './inbox.service';
 
-const USERS_KEY = 'saty_users';
+import { environment } from '../../environments/environment';
+
+const TOKEN_KEY = 'saty_auth_token';
 const CURRENT_USER_KEY = 'saty_current_user';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private currentUser: User | null = null;
+  private apiUrl = `${environment.apiUrl}/auth`;
+  private currentUserSubject = new BehaviorSubject<User | null>(null);
+  public currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor() {
-    const stored = localStorage.getItem(CURRENT_USER_KEY);
-    if (stored) {
-      this.currentUser = JSON.parse(stored) as User;
+  constructor(private http: HttpClient, private promoService: PromoService, private inboxService: InboxService) {
+    const storedUser = localStorage.getItem(CURRENT_USER_KEY);
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      this.currentUserSubject.next(user);
+      // Start notification polling if user is already logged in
+      this.inboxService.startPolling();
+      this.inboxService.getUnreadCount().subscribe();
+      
+      // Load promo codes to trigger popup on page reload (customer only)
+      if (user.role === 'customer') {
+        this.promoService.getActivePromoCodesWithPopup().subscribe();
+      }
     }
+  }
+
+  public get currentUserValue(): User | null {
+    return this.currentUserSubject.value;
   }
 
   isAuthenticated(): boolean {
-    return this.currentUser !== null;
+    return !!this.currentUserValue && !!localStorage.getItem(TOKEN_KEY);
   }
 
-  getCurrentUser(): User | null {
-    return this.currentUser;
+  isAdmin(): boolean {
+    return this.currentUserValue?.role === 'admin';
   }
 
-  private getAllUsers(): User[] {
-    const raw = localStorage.getItem(USERS_KEY);
-    return raw ? (JSON.parse(raw) as User[]) : [];
-  }
-
-  private saveAllUsers(users: User[]): void {
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-  }
-
-  register(data: {
-    fullName: string;
-    email: string;
-    phone: string;
-    password: string;
-    address?: string;
-    city?: string;
-    district?: string;
-  }): { ok: boolean; message: string } {
-    const users = this.getAllUsers();
-
-    if (users.some(u => u.email === data.email)) {
-      return { ok: false, message: 'Un compte existe déjà avec cet email.' };
-    }
-
-    const user: User = {
-      id: Date.now().toString(),
-      fullName: data.fullName,
-      name: data.fullName,
-      email: data.email,
-      phone: data.phone,
-      address: data.address,
-      city: data.city,
-      district: data.district,
-      password: data.password,
+  register(userData: any): Observable<any> {
+    // Adapter les champs si nécessaire
+    const payload = {
+      firstName: userData.firstName || userData.fullName?.split(' ')[0] || 'Prénom',
+      lastName: userData.lastName || userData.fullName?.split(' ').slice(1).join(' ') || 'Nom',
+      email: userData.email,
+      password: userData.password,
+      role: 'customer'
     };
 
-    users.push(user);
-    this.saveAllUsers(users);
-
-    this.currentUser = user;
-    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
-
-    return { ok: true, message: 'Compte créé avec succès.' };
+    return this.http.post<any>(`${this.apiUrl}/signup`, payload).pipe(
+      tap(res => {
+        console.log('Signup success response:', res);
+      }),
+      catchError(err => {
+        console.error('Signup error in AuthService:', err);
+        throw err;
+      })
+    );
   }
 
-  login(email: string, password: string): { ok: boolean; message: string } {
-    const users = this.getAllUsers();
-    const user = users.find(u => u.email === email && u.password === password);
-
-    if (!user) {
-      return { ok: false, message: 'Email ou mot de passe incorrect.' };
-    }
-
-    this.currentUser = user;
-    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
-
-    return { ok: true, message: 'Connexion réussie.' };
+  login(email: string, password: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/login`, { email, password }).pipe(
+      tap(res => {
+        if (res.token && res.user) {
+          localStorage.setItem(TOKEN_KEY, res.token);
+          localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(res.user));
+          this.currentUserSubject.next(res.user);
+          
+          // Start notification polling
+          this.inboxService.startPolling();
+          this.inboxService.getUnreadCount().subscribe();
+          
+          // Load promo codes to trigger popup (customer only)
+          if (res.user.role === 'customer') {
+            this.promoService.getActivePromoCodesWithPopup().subscribe();
+          }
+        }
+      })
+    );
   }
 
-  // 🔹 logout simple
   logout(): void {
-    this.currentUser = null;
+    localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(CURRENT_USER_KEY);
+    this.currentUserSubject.next(null);
+    this.inboxService.reset();
   }
 
-  // 🔹 Mettre à jour le profil de l'utilisateur courant
-  updateUserProfile(updated: User): void {
-    const users = this.getAllUsers();
-
-    const index = users.findIndex(u => u.id === updated.id);
-    if (index !== -1) {
-      users[index] = { ...users[index], ...updated };
-      this.saveAllUsers(users);
-    }
-
-    this.currentUser = updated;
-    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updated));
+  getMe(): Observable<User> {
+    return this.http.get<User>(`${this.apiUrl}/me`).pipe(
+      tap(user => {
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+        this.currentUserSubject.next(user);
+      })
+    );
   }
 
-  // 🔹 Supprimer l'utilisateur courant
-  deleteCurrentUser(): void {
-    if (!this.currentUser) return;
+  updateUserProfile(user: User): Observable<User> {
+    const payload = {
+      firstName: user.firstName || user.fullName?.split(' ')[0],
+      lastName: user.lastName || user.fullName?.split(' ').slice(1).join(' '),
+      email: user.email,
+      phone: user.phone,
+      address: user.address,
+      city: user.city,
+      district: user.district
+    };
 
-    const users = this.getAllUsers().filter(u => u.id !== this.currentUser!.id);
-    this.saveAllUsers(users);
+    return this.http.put<User>(`${this.apiUrl}/profile`, payload).pipe(
+      tap(updatedUser => {
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
+        this.currentUserSubject.next(updatedUser);
+      })
+    );
+  }
 
-    this.logout();
+  deleteCurrentUser(): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/profile`).pipe(
+      tap(() => this.logout())
+    );
+  }
+
+  // Compatibilité avec l'ancien code si nécessaire
+  getCurrentUser(): User | null {
+    return this.currentUserValue;
   }
 }

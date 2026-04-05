@@ -388,7 +388,7 @@
         <div class="summary__items">
           <div class="summary-item" *ngFor="let item of items">
             <img
-              [src]="item.image"
+              [src]="getImageUrl(item.image)"
               [alt]="item.name"
               class="summary-item__image"
             />
@@ -404,6 +404,48 @@
               {{ item.price * item.quantity | number }} FCFA
             </p>
           </div>
+        </div>
+
+        <!-- Code promo -->
+        <div class="summary__promo">
+          <div class="promo-input" *ngIf="!appliedPromo">
+            <input
+              type="text"
+              class="promo-input__field"
+              [(ngModel)]="promoCode"
+              placeholder="Code promo"
+              [disabled]="isValidatingPromo"
+            />
+            <button
+              type="button"
+              class="promo-input__btn"
+              (click)="applyPromoCode()"
+              [disabled]="isValidatingPromo || !promoCode.trim()"
+            >
+              <span *ngIf="!isValidatingPromo">Appliquer</span>
+              <span *ngIf="isValidatingPromo">...</span>
+            </button>
+          </div>
+
+          <div class="promo-applied" *ngIf="appliedPromo">
+            <div class="promo-applied__content">
+              <span class="promo-applied__icon">🎉</span>
+              <div class="promo-applied__info">
+                <span class="promo-applied__label">Code promo appliqué :</span>
+                <span class="promo-applied__code">{{ appliedPromo.code }}</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="promo-applied__remove"
+              (click)="removePromo()"
+              title="Retirer le code promo"
+            >
+              ✕
+            </button>
+          </div>
+
+          <p class="promo-error" *ngIf="promoError">{{ promoError }}</p>
         </div>
 
         <!-- Totaux -->
@@ -424,6 +466,11 @@
           <div class="summary__row" *ngIf="!deliveryInfo.commune">
             <span>Livraison</span>
             <span class="summary__row--pending">À calculer</span>
+          </div>
+
+          <div class="summary__row summary__row--discount" *ngIf="discount > 0">
+            <span>Réduction</span>
+            <span class="discount-amount">- {{ discount | number }} FCFA</span>
           </div>
 
           <div class="summary__divider"></div>

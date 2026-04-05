@@ -29,7 +29,7 @@ export interface Order {
   subtotal: number; // Total articles
   shippingCost: number;
   discount: number;
-  totalFcfa: number; // Total final
+  totalFcfa: number; 
 
   // Livraison
   shippingAddress: {
@@ -44,6 +44,7 @@ export interface Order {
   status: OrderStatus;
   createdAt: Date;
   confirmedAt?: Date;
+  processingAt?: Date;
   shippedAt?: Date;
   deliveredAt?: Date;
   cancelledAt?: Date;
@@ -66,4 +67,12 @@ export interface Order {
     date: Date;
     note?: string;
   }[];
+
+  // User info (pour l'admin)
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
 }

@@ -23,7 +23,7 @@
       <article class="cart-item" *ngFor="let item of items; let i = index">
         <!-- Image cliquable vers détails -->
         <div class="cart-item__image" (click)="goToProduct(item.productId)">
-          <img [src]="item.image" [alt]="item.name" />
+          <img [src]="getImageUrl(item.image)" [alt]="item.name" />
         </div>
 
         <!-- Infos cliquables vers détails -->

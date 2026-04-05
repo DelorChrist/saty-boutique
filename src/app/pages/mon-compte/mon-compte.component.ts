@@ -36,7 +36,7 @@ export class MonCompteComponent implements OnInit {
     private router: Router,
     private cartService: CartService,
     public favoritesService: FavoritesService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
@@ -49,7 +49,7 @@ export class MonCompteComponent implements OnInit {
 
     this.profileForm = this.fb.group({
       fullName: [
-        this.currentUser.fullName || this.currentUser.name,
+        this.currentUser.fullName || this.currentUser.name || `${this.currentUser.firstName} ${this.currentUser.lastName}`,
         [Validators.required],
       ],
       email: [
@@ -97,18 +97,32 @@ export class MonCompteComponent implements OnInit {
 
     this.saving = true;
 
+    const fullName = this.profileForm.value.fullName;
+    const parts = fullName.trim().split(' ');
+    const firstName = parts[0];
+    const lastName = parts.slice(1).join(' ') || '';
+
     const updated: User = {
       ...this.currentUser,
-      fullName: this.profileForm.value.fullName,
-      name: this.profileForm.value.fullName,
+      firstName,
+      lastName,
+      fullName: fullName,
+      name: fullName,
       email: this.profileForm.value.email,
       phone: this.profileForm.value.phone,
     };
 
-    this.authService.updateUserProfile(updated);
-    this.currentUser = updated;
-    this.saving = false;
-    this.editing = false;
+    this.authService.updateUserProfile(updated).subscribe({
+      next: (user) => {
+        this.currentUser = user;
+        this.saving = false;
+        this.editing = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.saving = false;
+      }
+    });
   }
 
   /* --------- Adresse --------- */
@@ -127,9 +141,15 @@ export class MonCompteComponent implements OnInit {
       district: this.addressForm.value.district,
     };
 
-    this.authService.updateUserProfile(updated);
-    this.currentUser = updated;
-    this.editingAddress = false;
+    this.authService.updateUserProfile(updated).subscribe({
+      next: (user) => {
+        this.currentUser = user;
+        this.editingAddress = false;
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
   }
 
   /* --------- Suppression de compte --------- */
@@ -142,8 +162,15 @@ export class MonCompteComponent implements OnInit {
       return;
     }
 
-    this.authService.deleteCurrentUser();
-    this.router.navigate(['/']);
+    this.authService.deleteCurrentUser().subscribe({
+      next: () => {
+        this.router.navigate(['/']);
+      },
+      error: (err) => {
+        console.error(err);
+        this.deleteConfirm = false;
+      }
+    });
   }
 
   /* --------- Recommandations : panier + favoris --------- */

@@ -4,93 +4,21 @@
     <div class="header-left">
       <!-- Bouton Catégories (burger) -->
       <div class="header-dropdown">
-        <button
-          type="button"
-          class="header-btn"
-          (click)="toggleCategories()"
-          aria-haspopup="true"
-          [attr.aria-expanded]="showCategories"
-        >
-          <img src="assets/icons/menu.svg" alt="" class="header-btn__icon" />
+        <button type="button" class="header-btn" (click)="toggleCategories()" aria-haspopup="true"
+          [attr.aria-expanded]="showCategories">
+          <svg class="header-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
         </button>
 
         <!-- Dropdown Catégories -->
-        <div
-          class="dropdown dropdown--categories"
-          *ngIf="showCategories"
-          role="menu"
-        >
-          <button
-            type="button"
-            (click)="goToCategory('boubous-hommes')"
-            role="menuitem"
-          >
-            <img
-              src="assets/icons/boubou-men.svg"
-              alt=""
-              class="dropdown__icon"
-            />
-            <span>Boubous hommes</span>
-          </button>
-          <button
-            type="button"
-            (click)="goToCategory('boubous-femmes')"
-            role="menuitem"
-          >
-            <img
-              src="assets/icons/boubou-women.svg"
-              alt=""
-              class="dropdown__icon"
-            />
-            <span>Boubous femmes</span>
-          </button>
-          <button
-            type="button"
-            (click)="goToCategory('chaussures')"
-            role="menuitem"
-          >
-            <img
-              src="assets/icons/shoes.svg"
-              alt=""
-              class="dropdown__icon"
-            />
-            <span>Chaussures</span>
-          </button>
-          <button
-            type="button"
-            (click)="goToCategory('tuniques')"
-            role="menuitem"
-          >
-            <img
-              src="assets/icons/tunic.svg"
-              alt=""
-              class="dropdown__icon"
-            />
-            <span>Tuniques</span>
-          </button>
-          <button
-            type="button"
-            (click)="goToCategory('chapeaux')"
-            role="menuitem"
-          >
-            <img
-              src="assets/icons/hat.svg"
-              alt=""
-              class="dropdown__icon"
-            />
-            <span>Chapeaux</span>
-          </button>
-          <button
-            type="button"
-            (click)="goToCategory('accessoires')"
-            role="menuitem"
-          >
-            <img
-              src="assets/icons/accessory.svg"
-              alt=""
-              class="dropdown__icon"
-            />
-            <span>Accessoires</span>
+        <div class="dropdown dropdown--categories" *ngIf="showCategories" role="menu">
+          <button *ngFor="let cat of categories" type="button" (click)="goToCategory(cat.slug)" role="menuitem">
+            <img [src]="getCategoryIcon(cat.slug)" [alt]="cat.name" class="dropdown__icon" />
+            <span>{{ cat.name }}</span>
           </button>
         </div>
       </div>
@@ -105,20 +33,9 @@
     <div class="header-center">
       <form class="search-bar" (ngSubmit)="onSearch()" role="search">
         <div class="search-bar__inner">
-          <img
-            src="assets/icons/search.svg"
-            alt=""
-            class="search-bar__icon"
-          />
-          <input
-            type="text"
-            placeholder="Rechercher un article..."
-            [(ngModel)]="searchQuery"
-            (input)="onSearchInput()"
-            name="search"
-            aria-label="Rechercher un article"
-            autocomplete="off"
-          />
+          <img src="assets/icons/search.svg" alt="" class="search-bar__icon" />
+          <input type="text" placeholder="Rechercher un article..." [(ngModel)]="searchQuery" (input)="onSearchInput()"
+            name="search" aria-label="Rechercher un article" autocomplete="off" />
         </div>
         <button type="submit" class="search-bar__button">
           Rechercher
@@ -126,16 +43,9 @@
 
         <!-- 🎯 SUGGESTIONS EN TEMPS RÉEL -->
         <div class="suggestions" *ngIf="showSuggestions && suggestions.length > 0">
-          <div
-            class="suggestion-item"
-            *ngFor="let product of suggestions"
-            (click)="goToProductFromSuggestion(product.id)"
-          >
-            <img
-              [src]="product.image"
-              [alt]="product.name"
-              class="suggestion-item__image"
-            />
+          <div class="suggestion-item" *ngFor="let product of suggestions"
+            (click)="goToProductFromSuggestion(product.id)">
+            <img [src]="product.image" [alt]="product.name" class="suggestion-item__image" />
             <div class="suggestion-item__info">
               <p class="suggestion-item__name">{{ product.name }}</p>
               <p class="suggestion-item__price">
@@ -145,11 +55,7 @@
           </div>
 
           <div class="suggestions__footer" *ngIf="suggestions.length >= 5">
-            <button
-              type="button"
-              class="suggestions__see-all"
-              (click)="onSearch()"
-            >
+            <button type="button" class="suggestions__see-all" (click)="onSearch()">
               Voir tous les résultats →
             </button>
           </div>
@@ -161,70 +67,43 @@
     <div class="header-right">
       <!-- Compte -->
       <div class="header-dropdown">
-        <button
-          type="button"
-          class="header-btn"
-          (click)="toggleAccountMenu()"
-          aria-haspopup="true"
-          [attr.aria-expanded]="showAccountMenu"
-        >
+        <button type="button" class="header-btn" (click)="toggleAccountMenu()" aria-haspopup="true"
+          [attr.aria-expanded]="showAccountMenu">
           <img src="assets/icons/user.svg" alt="" class="header-btn__icon" />
           <span *ngIf="!isAuthenticated">Se connecter</span>
           <span *ngIf="isAuthenticated">Bonjour, {{ greetingName }}</span>
-          <img
-            src="assets/icons/chevron-down.svg"
-            alt=""
-            class="header-btn__chevron"
-          />
+          <img src="assets/icons/chevron-down.svg" alt="" class="header-btn__chevron" />
         </button>
 
         <div class="dropdown" *ngIf="showAccountMenu" role="menu">
           <!-- Bouton rouge du haut -->
-          <button
-            type="button"
-            class="dropdown__login-btn connexion"
-            (click)="onAccountMainClick()"
-            role="menuitem"
-            *ngIf="!isAuthenticated"
-          >
+          <button type="button" class="dropdown__login-btn connexion" (click)="onAccountMainClick()" role="menuitem"
+            *ngIf="!isAuthenticated">
             Se connecter
           </button>
 
           <hr class="dropdown__divider" />
 
           <button type="button" (click)="goToAccount()" role="menuitem">
-            <img
-              src="assets/icons/account.svg"
-              alt=""
-              class="dropdown__icon"
-            />
+            <img src="assets/icons/account.svg" alt="" class="dropdown__icon" />
             <span>Mon compte</span>
           </button>
 
           <button type="button" (click)="goToOrders()" role="menuitem">
-            <img
-              src="assets/icons/orders.svg"
-              alt=""
-              class="dropdown__icon"
-            />
+            <img src="assets/icons/orders.svg" alt="" class="dropdown__icon" />
             <span>Mes commandes</span>
           </button>
 
           <button type="button" (click)="goToInbox()" role="menuitem">
-            <img
-              src="assets/icons/boite.png"
-              alt=""
-              class="dropdown__icon"
-            />
+            <img src="assets/icons/boite.png" alt="" class="dropdown__icon" />
             <span>Boîte de réception</span>
+            <span class="notification-badge" *ngIf="(inboxService.unreadCount$ | async) as count">
+              {{ count > 99 ? '99+' : count }}
+            </span>
           </button>
 
           <button type="button" (click)="goToFavorites()" role="menuitem">
-            <img
-              src="assets/icons/favorite.svg"
-              alt=""
-              class="dropdown__icon"
-            />
+            <img src="assets/icons/favorite.svg" alt="" class="dropdown__icon" />
             <span>Favoris ({{ favoritesService.getTotalItems() }})</span>
           </button>
 
@@ -235,13 +114,8 @@
 
           <!-- Bouton rouge Se déconnecter en bas -->
           <hr class="dropdown__divider" *ngIf="isAuthenticated" />
-          <button
-            type="button"
-            class="dropdown__login-btn deconnexion"
-            role="menuitem"
-            *ngIf="isAuthenticated"
-            (click)="logout()"
-          >
+          <button type="button" class="dropdown__login-btn deconnexion" role="menuitem" *ngIf="isAuthenticated"
+            (click)="logout()">
             Se déconnecter
           </button>
         </div>
@@ -249,74 +123,36 @@
 
       <!-- Aide -->
       <div class="header-dropdown">
-        <button
-          type="button"
-          class="header-btn"
-          (click)="toggleHelpMenu()"
-          aria-haspopup="true"
-          [attr.aria-expanded]="showHelpMenu"
-        >
+        <button type="button" class="header-btn" (click)="toggleHelpMenu()" aria-haspopup="true"
+          [attr.aria-expanded]="showHelpMenu">
           <img src="assets/icons/help.svg" alt="" class="header-btn__icon" />
           <span>Aide</span>
-          <img
-            src="assets/icons/chevron-down.svg"
-            alt=""
-            class="header-btn__chevron"
-          />
+          <img src="assets/icons/chevron-down.svg" alt="" class="header-btn__chevron" />
         </button>
 
         <div class="dropdown" *ngIf="showHelpMenu" role="menu">
-          <button
-            type="button"
-            role="menuitem"
-            (click)="goToCentreAssistance()"
-          >
+          <button type="button" role="menuitem" (click)="goToCentreAssistance()">
             <span>Centre d'assistance</span>
           </button>
-          <button
-            type="button"
-            role="menuitem"
-            (click)="goToCommentCommander()"
-          >
+          <button type="button" role="menuitem" (click)="goToCommentCommander()">
             <span>Comment commander</span>
           </button>
-          <button
-            type="button"
-            role="menuitem"
-            (click)="goToCommentPayer()"
-          >
+          <button type="button" role="menuitem" (click)="goToCommentPayer()">
             <span>Comment payer</span>
           </button>
-          <button
-            type="button"
-            role="menuitem"
-            (click)="goToBoutiqueCocody()"
-          >
+          <button type="button" role="menuitem" (click)="goToBoutiqueCocody()">
             <span>Retrouver la boutique (Cocody)</span>
           </button>
 
           <div class="help-actions">
-            <button
-              type="button"
-              class="help-btn help-btn--whatsapp"
-              (click)="openWhatsApp()"
-              aria-label="Contacter la boutique sur WhatsApp"
-            >
-              <img
-                src="assets/icons/whatsapp.svg"
-                alt=""
-                class="help-btn__icon"
-                aria-hidden="true"
-              />
+            <button type="button" class="help-btn help-btn--whatsapp" (click)="openWhatsApp()"
+              aria-label="Contacter la boutique sur WhatsApp">
+              <img src="assets/icons/whatsapp.svg" alt="" class="help-btn__icon" aria-hidden="true" />
               <span>WhatsApp</span>
             </button>
 
-            <button
-              type="button"
-              class="help-btn help-btn--livechat"
-              (click)="openLiveChat()"
-              aria-label="Ouvrir le chat en direct"
-            >
+            <button type="button" class="help-btn help-btn--livechat" (click)="openLiveChat()"
+              aria-label="Ouvrir le chat en direct">
               <span>Chat en direct</span>
             </button>
           </div>
@@ -324,20 +160,12 @@
       </div>
 
       <!-- Panier avec badge -->
-      <button
-        type="button"
-        class="header-btn header-btn--cart"
-        (click)="goToCart()"
-        aria-label="Voir le panier"
-      >
+      <button type="button" class="header-btn header-btn--cart" (click)="goToCart()" aria-label="Voir le panier">
         <img src="assets/icons/cart.svg" alt="" class="header-btn__icon" />
         <span>Panier</span>
 
         <!-- Badge uniquement si connecté ET panier > 0 -->
-        <span
-          class="header-badge"
-          *ngIf="isAuthenticated && cartService.getTotalItems() > 0"
-        >
+        <span class="header-badge" *ngIf="isAuthenticated && cartService.getTotalItems() > 0">
           {{ cartService.getTotalItems() }}
         </span>
       </button>

@@ -1,0 +1,117 @@
+<div class="promo-mgmt-container">
+    <div class="admin-header">
+        <h1 class="admin-title">Gestion des Codes Promo</h1>
+    </div>
+
+    <!-- Message de statut -->
+    <div *ngIf="statusMessage" class="status-msg" [ngClass]="'status-msg--' + statusType">
+        {{ statusMessage }}
+    </div>
+
+    <div class="mgmt-grid">
+        <!-- Formulaire -->
+        <div class="form-card">
+            <h2 class="card-title">{{ isEditMode ? 'Modifier' : 'Ajouter' }} un Code</h2>
+            <form [formGroup]="promoForm" (ngSubmit)="onSubmit()">
+                <div class="form-group">
+                    <label class="form-label">Code (Majuscules & Chiffres) *</label>
+                    <input type="text" formControlName="code" class="form-input" placeholder="Ex: SOLDES2024">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Type *</label>
+                        <select formControlName="type" class="form-select">
+                            <option value="percentage">Pourcentage (%)</option>
+                            <option value="fixed">Montant Fixe (FCFA)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Valeur *</label>
+                        <input type="number" formControlName="discount" class="form-input">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Date d'expiration</label>
+                    <input type="date" formControlName="expiryDate" class="form-input">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Min. Commande (FCFA)</label>
+                        <input type="number" formControlName="minOrderAmount" class="form-input">
+                    </div>
+                    <div class="form-group toggle-group">
+                        <label class="toggle-item">
+                            <input type="checkbox" formControlName="isActive" class="toggle-checkbox">
+                            <span class="toggle-label">Actif</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" *ngIf="isEditMode" (click)="resetForm()" class="btn-cancel">Annuler</button>
+                    <button type="submit" [disabled]="promoForm.invalid || submitting" class="btn-submit">
+                        {{ submitting ? 'Traitement...' : (isEditMode ? 'Mettre à jour' : 'Ajouter') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Liste -->
+        <div class="list-card">
+            <h2 class="card-title">Codes Actifs ({{ promos.length }})</h2>
+            <div class="loading-spinner" *ngIf="loading">Chargement...</div>
+
+            <div class="promo-table-wrapper" *ngIf="!loading">
+                <table class="promo-table">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Valeur</th>
+                            <th>Expiration</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let promo of promos">
+                            <td>
+                                <div class="promo-code">{{ promo.code }}</div>
+                                <span class="badge" [ngClass]="promo.isActive ? 'badge--success' : 'badge--error'">
+                                    {{ promo.isActive ? 'Actif' : 'Inactif' }}
+                                </span>
+                            </td>
+                            <td>
+                                {{ promo.discount }}{{ promo.type === 'percentage' ? '%' : ' FCFA' }}
+                            </td>
+                            <td>
+                                <div class="promo-expiry"
+                                    [class.expired]="promo.expiryDate && isExpired(promo.expiryDate)">
+                                    {{ (promo.expiryDate | date:'dd/MM/yyyy') || 'Aucune' }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-btns">
+                                    <button (click)="editPromo(promo)" class="btn-icon edit" title="Modifier">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path
+                                                d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                        </svg>
+                                    </button>
+                                    <button (click)="deletePromo(promo.id)" class="btn-icon delete" title="Supprimer">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="empty-state" *ngIf="promos.length === 0">Aucun code promo créé.</div>
+            </div>
+        </div>
+    </div>
+</div>

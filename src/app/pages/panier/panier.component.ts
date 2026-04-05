@@ -3,6 +3,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { CartService, CartItem } from '../../services/cart.service';
+import { ToastService } from '../../services/toast.service';
+import { ConfirmDialogService } from '../../services/confirm-dialog.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-panier',
@@ -17,6 +20,8 @@ export class PanierComponent implements OnInit {
   constructor(
     public cartService: CartService,
     private router: Router,
+    private toastService: ToastService,
+    private confirmService: ConfirmDialogService
   ) {}
 
   ngOnInit(): void {
@@ -37,15 +42,29 @@ export class PanierComponent implements OnInit {
     }
   }
 
-  removeItem(index: number): void {
-    if (confirm('Retirer cet article du panier ?')) {
+  async removeItem(index: number): Promise<void> {
+    const confirmed = await this.confirmService.confirm(
+      'Retirer cet article du panier ?',
+      'Retirer l\'article',
+      { confirmText: 'Retirer', type: 'warning' }
+    );
+
+    if (confirmed) {
       this.cartService.removeItem(index);
+      this.toastService.success('Article retiré du panier');
     }
   }
 
-  clearCart(): void {
-    if (confirm('Vider tout le panier ?')) {
+  async clearCart(): Promise<void> {
+    const confirmed = await this.confirmService.confirm(
+      'Vider tout le panier ?',
+      'Vider le panier',
+      { confirmText: 'Vider', type: 'warning' }
+    );
+
+    if (confirmed) {
       this.cartService.clearCart();
+      this.toastService.success('Panier vidé');
     }
   }
 
@@ -55,7 +74,7 @@ export class PanierComponent implements OnInit {
 
   proceedToCheckout(): void {
     if (this.items.length === 0) {
-      alert('Votre panier est vide');
+      this.toastService.warning('Votre panier est vide');
       return;
     }
     this.router.navigate(['/checkout']);
@@ -63,5 +82,11 @@ export class PanierComponent implements OnInit {
 
   goToProduct(productId: string): void {
     this.router.navigate(['/details-produit', productId]);
+  }
+
+  getImageUrl(imagePath: string): string {
+    if (!imagePath) return '/assets/placeholder.jpg';
+    if (imagePath.startsWith('http')) return imagePath;
+    return `${environment.mediaUrl}${imagePath}`;
   }
 }

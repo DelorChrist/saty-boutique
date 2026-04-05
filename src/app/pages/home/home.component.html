@@ -13,35 +13,25 @@
       </p>
 
       <div class="home-hero__actions">
-        <a
-          (click)="goToCategory('boubous-femmes')"
-          class="btn btn--primary reveal"
-          data-delay="300"
-        >
+        <a (click)="goToCategory('boubous-femmes')" class="btn btn--primary reveal" data-delay="300">
           Découvrir nos articles
         </a>
-        <a
-          routerLink="/nouveaux-produits"
-          class="btn btn--ghost reveal"
-          data-delay="400"
-        >
+        <a routerLink="/nouveaux-produits" class="btn btn--ghost reveal" data-delay="400">
           Voir toutes les nouveautés
         </a>
       </div>
     </div>
 
     <div class="home-hero__image reveal" data-delay="500">
-      <img
-        src="https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=900&q=80"
-        alt="Modèle portant une tenue africaine élégante"
-      />
+      <img src="https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=900&q=80"
+        alt="Modèle portant une tenue africaine élégante" />
     </div>
   </section>
 
   <!-- POURQUOI ACHETER CHEZ NOUS -->
   <section class="home-benefits">
     <h2 class="home-benefits__title reveal" data-delay="0">
-      POURQUOI <span>ACHETER</span> CHEZ NOUS ? 
+      POURQUOI <span>ACHETER</span> CHEZ NOUS ?
     </h2>
 
     <div class="home-benefits__grid">
@@ -80,612 +70,121 @@
     </div>
   </section>
 
-  <!-- BANNER NEW ARRIVALS -->
-  <section class="home-banner">
+  <!-- BANNER VEDETTE (PRODUIT DE LA SEMAINE) -->
+  <section class="home-banner" *ngIf="featuredProduct">
     <div class="home-banner__image reveal" data-delay="0">
-      <img
-        src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80"
-        alt="Homme portant une chemise moderne"
-      />
+      <img [src]="getImageUrl(featuredProduct.images)" [alt]="featuredProduct.name" />
     </div>
 
     <div class="home-banner__content">
       <p class="home-banner__tag reveal" data-delay="100">
-        Nouveautés Chez Saty Boutique
+        Vedette de Saty Boutique
       </p>
       <h2 class="home-banner__title reveal" data-delay="200">
-        Découvrez nos nouvelles tenues
+        {{ featuredProduct.name }}
       </h2>
       <p class="home-banner__text reveal" data-delay="300">
-        Des coupes modernes et des tissus confortables pour rester élégant au
-        quotidien, au bureau comme en sortie.
+        {{ featuredProduct.description | slice:0:150 }}{{ featuredProduct.description.length > 150 ? '...' : '' }}
       </p>
 
-      <a
-        (click)="goToCategory('boubous-hommes')"
-        class="home-banner__btn reveal"
-        data-delay="400"
-      >
+      <a (click)="goToProduct(featuredProduct.id)" class="home-banner__btn reveal" data-delay="400">
         Acheter
       </a>
     </div>
   </section>
 
-  <!-- SECTION PRODUITS PRINCIPALE -->
-  <section class="home-products">
-    <p class="home-products__eyebrow reveal" data-delay="0">Saty Boutique</p>
-    <h2 class="home-products__title reveal" data-delay="100">
-      NOS PRODUITS
-    </h2>
-    <p class="home-products__subtitle reveal" data-delay="200">
-      Découvrez une sélection de tenues africaines modernes, pensées pour
-      sublimer votre style au quotidien.
-    </p>
-
-    <div class="home-products__grid">
-      <!-- Produit 1 -->
-      <article class="home-product-card reveal" data-delay="0">
-        <div class="home-product-card__image-wrapper">
-          <img
-            src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80"
-            alt="Chemise moderne"
-            class="home-product-card__image"
-          />
-          <div class="home-product-card__overlay">
-            <button
-              class="home-product-card__icon-btn home-product-card__icon-btn--heart"
-              [class.home-product-card__icon-btn--favorite]="favoritesService.isFavorite('p1')"
-              (click)="toggleFavorite({ id: 'p1', name: 'Chemise moderne', price: 25000, image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80', categorySlug: 'chemises' }); $event.stopPropagation()"
-              title="Ajouter aux favoris"
-            >
-              ❤️
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="addToCartFromHome({ id: 'p1', name: 'Chemise moderne', price: 25000, image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80' }); $event.stopPropagation()"
-            >
-              <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="goToProduct('p1'); $event.stopPropagation()"
-            >
-              <img src="assets/icons/oeil.svg" alt="Voir les détails" />
-            </button>
-          </div>
-        </div>
-        <h3 class="home-product-card__name">Chemise moderne</h3>
-        <p class="home-product-card__price">25 000 FCFA</p>
-      </article>
-
-      <!-- Produit 2 -->
-      <article class="home-product-card reveal" data-delay="100">
-        <div class="home-product-card__image-wrapper">
-          <img
-            src="https://images.unsplash.com/photo-1514996937319-344454492b37?auto=format&fit=crop&w=900&q=80"
-            alt="Robe africaine élégante"
-            class="home-product-card__image"
-          />
-          <div class="home-product-card__overlay">
-            <button
-              class="home-product-card__icon-btn home-product-card__icon-btn--heart"
-              [class.home-product-card__icon-btn--favorite]="favoritesService.isFavorite('p2')"
-              (click)="toggleFavorite({ id: 'p2', name: 'Robe africaine élégante', price: 35000, image: 'https://images.unsplash.com/photo-1514996937319-344454492b37?auto=format&fit=crop&w=900&q=80', categorySlug: 'robes' }); $event.stopPropagation()"
-              title="Ajouter aux favoris"
-            >
-              ❤️
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="addToCartFromHome({ id: 'p2', name: 'Robe africaine élégante', price: 35000, image: 'https://images.unsplash.com/photo-1514996937319-344454492b37?auto=format&fit=crop&w=900&q=80' }); $event.stopPropagation()"
-            >
-              <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="goToProduct('p2'); $event.stopPropagation()"
-            >
-              <img src="assets/icons/oeil.svg" alt="Voir les détails" />
-            </button>
-          </div>
-        </div>
-        <h3 class="home-product-card__name">Robe africaine élégante</h3>
-        <p class="home-product-card__price">35 000 FCFA</p>
-      </article>
-
-      <!-- Produit 3 -->
-      <article class="home-product-card reveal" data-delay="200">
-        <div class="home-product-card__image-wrapper">
-          <img
-            src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=900&q=80"
-            alt="Ensemble pagne"
-            class="home-product-card__image"
-          />
-          <div class="home-product-card__overlay">
-            <button
-              class="home-product-card__icon-btn home-product-card__icon-btn--heart"
-              [class.home-product-card__icon-btn--favorite]="favoritesService.isFavorite('p3')"
-              (click)="toggleFavorite({ id: 'p3', name: 'Ensemble pagne', price: 40000, image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=900&q=80', categorySlug: 'ensembles' }); $event.stopPropagation()"
-              title="Ajouter aux favoris"
-            >
-              ❤️
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="addToCartFromHome({ id: 'p3', name: 'Ensemble pagne', price: 40000, image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=900&q=80' }); $event.stopPropagation()"
-            >
-              <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="goToProduct('p3'); $event.stopPropagation()"
-            >
-              <img src="assets/icons/oeil.svg" alt="Voir les détails" />
-            </button>
-          </div>
-        </div>
-        <h3 class="home-product-card__name">Ensemble pagne</h3>
-        <p class="home-product-card__price">40 000 FCFA</p>
-      </article>
-
-      <!-- Produit 4 -->
-      <article class="home-product-card reveal" data-delay="300">
-        <div class="home-product-card__image-wrapper">
-          <img
-            src="https://images.unsplash.com/photo-1490111718993-d98654ce6cf7?auto=format&fit=crop&w=900&q=80"
-            alt="Boubou élégant"
-            class="home-product-card__image"
-          />
-          <div class="home-product-card__overlay">
-            <button
-              class="home-product-card__icon-btn home-product-card__icon-btn--heart"
-              [class.home-product-card__icon-btn--favorite]="favoritesService.isFavorite('p4')"
-              (click)="toggleFavorite({ id: 'p4', name: 'Boubou élégant', price: 32000, image: 'https://images.unsplash.com/photo-1490111718993-d98654ce6cf7?auto=format&fit=crop&w=900&q=80', categorySlug: 'boubous-hommes' }); $event.stopPropagation()"
-              title="Ajouter aux favoris"
-            >
-              ❤️
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="addToCartFromHome({ id: 'p4', name: 'Boubou élégant', price: 32000, image: 'https://images.unsplash.com/photo-1490111718993-d98654ce6cf7?auto=format&fit=crop&w=900&q=80' }); $event.stopPropagation()"
-            >
-              <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="goToProduct('p4'); $event.stopPropagation()"
-            >
-              <img src="assets/icons/oeil.svg" alt="Voir les détails" />
-            </button>
-          </div>
-        </div>
-        <h3 class="home-product-card__name">Boubou élégant</h3>
-        <p class="home-product-card__price">32 000 FCFA</p>
-      </article>
-
-      <!-- Produit 5 -->
-      <article class="home-product-card reveal" data-delay="400">
-        <div class="home-product-card__image-wrapper">
-          <img
-            src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=900&q=80"
-            alt="Tenue de soirée"
-            class="home-product-card__image"
-          />
-          <div class="home-product-card__overlay">
-            <button
-              class="home-product-card__icon-btn home-product-card__icon-btn--heart"
-              [class.home-product-card__icon-btn--favorite]="favoritesService.isFavorite('p5')"
-              (click)="toggleFavorite({ id: 'p5', name: 'Tenue de soirée', price: 45000, image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=900&q=80', categorySlug: 'robes' }); $event.stopPropagation()"
-              title="Ajouter aux favoris"
-            >
-              ❤️
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="addToCartFromHome({ id: 'p5', name: 'Tenue de soirée', price: 45000, image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=900&q=80' }); $event.stopPropagation()"
-            >
-              <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="goToProduct('p5'); $event.stopPropagation()"
-            >
-              <img src="assets/icons/oeil.svg" alt="Voir les détails" />
-            </button>
-          </div>
-        </div>
-        <h3 class="home-product-card__name">Tenue de soirée</h3>
-        <p class="home-product-card__price">45 000 FCFA</p>
-      </article>
-
-      <!-- Produit 6 -->
-      <article class="home-product-card reveal" data-delay="500">
-        <div class="home-product-card__image-wrapper">
-          <img
-            src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80"
-            alt="Ensemble fashion"
-            class="home-product-card__image"
-          />
-          <div class="home-product-card__overlay">
-            <button
-              class="home-product-card__icon-btn home-product-card__icon-btn--heart"
-              [class.home-product-card__icon-btn--favorite]="favoritesService.isFavorite('p6')"
-              (click)="toggleFavorite({ id: 'p6', name: 'Ensemble fashion', price: 28000, image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80', categorySlug: 'ensembles' }); $event.stopPropagation()"
-              title="Ajouter aux favoris"
-            >
-              ❤️
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="addToCartFromHome({ id: 'p6', name: 'Ensemble fashion', price: 28000, image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80' }); $event.stopPropagation()"
-            >
-              <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="goToProduct('p6'); $event.stopPropagation()"
-            >
-              <img src="assets/icons/oeil.svg" alt="Voir les détails" />
-            </button>
-          </div>
-        </div>
-        <h3 class="home-product-card__name">Ensemble fashion</h3>
-        <p class="home-product-card__price">28 000 FCFA</p>
-      </article>
-    </div>
-
-    <div class="home-products__cta reveal" data-delay="600">
-      <a routerLink="/produits" class="home-products__cta-btn">
-        Voir tous les produits
-      </a>
-    </div>
-  </section>
-
-  <!-- TOP SELLING AVEC TABS ANGULAR -->
-  <section class="home-top">
+  <!-- TOP SELLING AVEC TABS -->
+  <section class="home-top" *ngIf="!loading">
     <div class="home-top__header">
       <h2 class="home-top__title reveal" data-delay="0">Les plus Vendus</h2>
 
       <nav class="home-top__tabs reveal" data-delay="100">
-        <button
-          class="home-top__tab"
-          [class.home-top__tab--active]="activeCategory === 'boubous'"
-          (click)="setCategory('boubous')"
-        >
+        <button class="home-top__tab" [class.home-top__tab--active]="activeCategory === 'boubous'"
+          (click)="setCategory('boubous')">
           Boubous
         </button>
-        <button
-          class="home-top__tab"
-          [class.home-top__tab--active]="activeCategory === 'robes'"
-          (click)="setCategory('robes')"
-        >
+        <button class="home-top__tab" [class.home-top__tab--active]="activeCategory === 'robes'"
+          (click)="setCategory('robes')">
           Robes
         </button>
-        <button
-          class="home-top__tab"
-          [class.home-top__tab--active]="activeCategory === 'ensembles'"
-          (click)="setCategory('ensembles')"
-        >
+        <button class="home-top__tab" [class.home-top__tab--active]="activeCategory === 'ensembles'"
+          (click)="setCategory('ensembles')">
           Ensembles
         </button>
-        <button
-          class="home-top__tab"
-          [class.home-top__tab--active]="activeCategory === 'accessoires'"
-          (click)="setCategory('accessoires')"
-        >
+        <button class="home-top__tab" [class.home-top__tab--active]="activeCategory === 'accessoires'"
+          (click)="setCategory('accessoires')">
           Accessoires
         </button>
       </nav>
     </div>
 
+    <div class="home-top__grid" *ngIf="getFilteredBestSellers().length > 0">
+      <article class="home-product-card home-product-card--top reveal"
+        *ngFor="let product of getFilteredBestSellers(); let i = index" [attr.data-delay]="i * 100">
+        <div class="home-product-card__image-wrapper">
+          <img [src]="getImageUrl(product.images)" [alt]="product.name" class="home-product-card__image" />
+          <div class="home-product-card__overlay">
+            <button class="home-product-card__icon-btn home-product-card__icon-btn--heart"
+              [class.home-product-card__icon-btn--favorite]="favoritesService.isFavorite(product.id)"
+              (click)="toggleFavorite(product); $event.stopPropagation()" title="Ajouter aux favoris">
+              ❤️
+            </button>
+            <button class="home-product-card__icon-btn" (click)="addToCartFromHome(product); $event.stopPropagation()">
+              <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
+            </button>
+            <button class="home-product-card__icon-btn" (click)="goToProduct(product.id); $event.stopPropagation()">
+              <img src="assets/icons/oeil.svg" alt="Voir les détails" />
+            </button>
+          </div>
+        </div>
+        <h3 class="home-product-card__name">{{ product.name }}</h3>
+        <p class="home-product-card__price">{{ product.price | number }} FCFA</p>
+      </article>
+    </div>
+
+    <div class="home-products__empty" *ngIf="getFilteredBestSellers().length === 0">
+      <p>Aucune meilleure vente dans cette catégorie pour le moment.</p>
+    </div>
+  </section>
+
+  <!-- TOUS LES PRODUITS EN VENTE -->
+  <section class="home-top" *ngIf="!loading && allProducts.length > 0">
+    <div class="home-top__header">
+      <h2 class="home-top__title reveal" data-delay="0">Articles en vente</h2>
+      <p class="home-top__subtitle reveal" data-delay="100">Découvrez tous nos articles disponibles en stock</p>
+    </div>
+
     <div class="home-top__grid">
-      <!-- Boubous -->
-      <article
-        class="home-product-card home-product-card--top reveal"
-        data-delay="0"
-        *ngIf="activeCategory === 'boubous'"
-      >
+      <article class="home-product-card reveal" *ngFor="let product of allProducts; let i = index"
+        [attr.data-delay]="i * 100">
         <div class="home-product-card__image-wrapper">
-          <img
-            src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80"
-            alt="Boubou wax premium"
-            class="home-product-card__image"
-          />
+          <img [src]="getImageUrl(product.images)" [alt]="product.name" class="home-product-card__image" />
           <div class="home-product-card__overlay">
-            <button
-              class="home-product-card__icon-btn home-product-card__icon-btn--heart"
-              [class.home-product-card__icon-btn--favorite]="favoritesService.isFavorite('p7')"
-              (click)="toggleFavorite({ id: 'p7', name: 'Boubou wax premium', price: 38000, image: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80', categorySlug: 'boubous-hommes' }); $event.stopPropagation()"
-              title="Ajouter aux favoris"
-            >
+            <button class="home-product-card__icon-btn home-product-card__icon-btn--heart"
+              [class.home-product-card__icon-btn--favorite]="favoritesService.isFavorite(product.id)"
+              (click)="toggleFavorite(product); $event.stopPropagation()" title="Ajouter aux favoris">
               ❤️
             </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="addToCartFromHome({ id: 'p7', name: 'Boubou wax premium', price: 38000, image: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80' }); $event.stopPropagation()"
-            >
+            <button class="home-product-card__icon-btn" (click)="addToCartFromHome(product); $event.stopPropagation()">
               <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
             </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="goToProduct('p7'); $event.stopPropagation()"
-            >
+            <button class="home-product-card__icon-btn" (click)="goToProduct(product.id); $event.stopPropagation()">
               <img src="assets/icons/oeil.svg" alt="Voir les détails" />
             </button>
           </div>
         </div>
-        <h3 class="home-product-card__name">Boubou wax premium</h3>
-        <p class="home-product-card__price">38 000 FCFA</p>
+        <h3 class="home-product-card__name">{{ product.name }}</h3>
+        <p class="home-product-card__price">{{ product.price | number }} FCFA</p>
       </article>
+    </div>
+  </section>
 
-      <article
-        class="home-product-card home-product-card--top reveal"
-        data-delay="100"
-        *ngIf="activeCategory === 'boubous'"
-      >
-        <div class="home-product-card__image-wrapper">
-          <img
-            src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=900&q=80"
-            alt="Boubou brodé"
-            class="home-product-card__image"
-          />
-          <div class="home-product-card__overlay">
-            <button
-              class="home-product-card__icon-btn home-product-card__icon-btn--heart"
-              [class.home-product-card__icon-btn--favorite]="favoritesService.isFavorite('p8')"
-              (click)="toggleFavorite({ id: 'p8', name: 'Boubou brodé', price: 42000, image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=900&q=80', categorySlug: 'boubous-hommes' }); $event.stopPropagation()"
-              title="Ajouter aux favoris"
-            >
-              ❤️
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="addToCartFromHome({ id: 'p8', name: 'Boubou brodé', price: 42000, image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=900&q=80' }); $event.stopPropagation()"
-            >
-              <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="goToProduct('p8'); $event.stopPropagation()"
-            >
-              <img src="assets/icons/oeil.svg" alt="Voir les détails" />
-            </button>
-          </div>
-        </div>
-        <h3 class="home-product-card__name">Boubou brodé</h3>
-        <p class="home-product-card__price">42 000 FCFA</p>
-      </article>
-
-      <!-- Robes -->
-      <article
-        class="home-product-card home-product-card--top reveal"
-        data-delay="0"
-        *ngIf="activeCategory === 'robes'"
-      >
-        <div class="home-product-card__image-wrapper">
-          <img
-            src="https://images.unsplash.com/photo-1514996937319-344454492b37?auto=format&fit=crop&w=900&q=80"
-            alt="Robe pagne"
-            class="home-product-card__image"
-          />
-          <div class="home-product-card__overlay">
-            <button
-              class="home-product-card__icon-btn home-product-card__icon-btn--heart"
-              [class.home-product-card__icon-btn--favorite]="favoritesService.isFavorite('p9')"
-              (click)="toggleFavorite({ id: 'p9', name: 'Robe pagne', price: 30000, image: 'https://images.unsplash.com/photo-1514996937319-344454492b37?auto=format&fit=crop&w=900&q=80', categorySlug: 'robes' }); $event.stopPropagation()"
-              title="Ajouter aux favoris"
-            >
-              ❤️
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="addToCartFromHome({ id: 'p9', name: 'Robe pagne', price: 30000, image: 'https://images.unsplash.com/photo-1514996937319-344454492b37?auto=format&fit=crop&w=900&q=80' }); $event.stopPropagation()"
-            >
-              <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="goToProduct('p9'); $event.stopPropagation()"
-            >
-              <img src="assets/icons/oeil.svg" alt="Voir les détails" />
-            </button>
-          </div>
-        </div>
-        <h3 class="home-product-card__name">Robe pagne</h3>
-        <p class="home-product-card__price">30 000 FCFA</p>
-      </article>
-
-      <article
-        class="home-product-card home-product-card--top reveal"
-        data-delay="100"
-        *ngIf="activeCategory === 'robes'"
-      >
-        <div class="home-product-card__image-wrapper">
-          <img
-            src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=900&q=80"
-            alt="Robe de soirée"
-            class="home-product-card__image"
-          />
-          <div class="home-product-card__overlay">
-            <button
-              class="home-product-card__icon-btn home-product-card__icon-btn--heart"
-              [class.home-product-card__icon-btn--favorite]="favoritesService.isFavorite('p10')"
-              (click)="toggleFavorite({ id: 'p10', name: 'Robe de soirée', price: 50000, image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=900&q=80', categorySlug: 'robes' }); $event.stopPropagation()"
-              title="Ajouter aux favoris"
-            >
-              ❤️
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="addToCartFromHome({ id: 'p10', name: 'Robe de soirée', price: 50000, image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=900&q=80' }); $event.stopPropagation()"
-            >
-              <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="goToProduct('p10'); $event.stopPropagation()"
-            >
-              <img src="assets/icons/oeil.svg" alt="Voir les détails" />
-            </button>
-          </div>
-        </div>
-        <h3 class="home-product-card__name">Robe de soirée</h3>
-        <p class="home-product-card__price">50 000 FCFA</p>
-      </article>
-
-      <!-- Ensembles -->
-      <article
-        class="home-product-card home-product-card--top reveal"
-        data-delay="0"
-        *ngIf="activeCategory === 'ensembles'"
-      >
-        <div class="home-product-card__image-wrapper">
-          <img
-            src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80"
-            alt="Ensemble bazin"
-            class="home-product-card__image"
-          />
-          <div class="home-product-card__overlay">
-            <button
-              class="home-product-card__icon-btn home-product-card__icon-btn--heart"
-              [class.home-product-card__icon-btn--favorite]="favoritesService.isFavorite('p11')"
-              (click)="toggleFavorite({ id: 'p11', name: 'Ensemble bazin', price: 55000, image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80', categorySlug: 'ensembles' }); $event.stopPropagation()"
-              title="Ajouter aux favoris"
-            >
-              ❤️
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="addToCartFromHome({ id: 'p11', name: 'Ensemble bazin', price: 55000, image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80' }); $event.stopPropagation()"
-            >
-              <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="goToProduct('p11'); $event.stopPropagation()"
-            >
-              <img src="assets/icons/oeil.svg" alt="Voir les détails" />
-            </button>
-          </div>
-        </div>
-        <h3 class="home-product-card__name">Ensemble bazin</h3>
-        <p class="home-product-card__price">55 000 FCFA</p>
-      </article>
-
-      <article
-        class="home-product-card home-product-card--top reveal"
-        data-delay="100"
-        *ngIf="activeCategory === 'ensembles'"
-      >
-        <div class="home-product-card__image-wrapper">
-          <img
-            src="https://images.unsplash.com/photo-1490111718993-d98654ce6cf7?auto=format&fit=crop&w=900&q=80"
-            alt="Ensemble casual"
-            class="home-product-card__image"
-          />
-          <div class="home-product-card__overlay">
-            <button
-              class="home-product-card__icon-btn home-product-card__icon-btn--heart"
-              [class.home-product-card__icon-btn--favorite]="favoritesService.isFavorite('p12')"
-              (click)="toggleFavorite({ id: 'p12', name: 'Ensemble casual', price: 32000, image: 'https://images.unsplash.com/photo-1490111718993-d98654ce6cf7?auto=format&fit=crop&w=900&q=80', categorySlug: 'ensembles' }); $event.stopPropagation()"
-              title="Ajouter aux favoris"
-            >
-              ❤️
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="addToCartFromHome({ id: 'p12', name: 'Ensemble casual', price: 32000, image: 'https://images.unsplash.com/photo-1490111718993-d98654ce6cf7?auto=format&fit=crop&w=900&q=80' }); $event.stopPropagation()"
-            >
-              <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="goToProduct('p12'); $event.stopPropagation()"
-            >
-              <img src="assets/icons/oeil.svg" alt="Voir les détails" />
-            </button>
-          </div>
-        </div>
-        <h3 class="home-product-card__name">Ensemble casual</h3>
-        <p class="home-product-card__price">32 000 FCFA</p>
-      </article>
-
-      <!-- Accessoires -->
-      <article
-        class="home-product-card home-product-card--top reveal"
-        data-delay="0"
-        *ngIf="activeCategory === 'accessoires'"
-      >
-        <div class="home-product-card__image-wrapper">
-          <img
-            src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=900&q=80"
-            alt="Sac assorti"
-            class="home-product-card__image"
-          />
-          <div class="home-product-card__overlay">
-            <button
-              class="home-product-card__icon-btn home-product-card__icon-btn--heart"
-              [class.home-product-card__icon-btn--favorite]="favoritesService.isFavorite('p13')"
-              (click)="toggleFavorite({ id: 'p13', name: 'Sac assorti', price: 18000, image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=900&q=80', categorySlug: 'accessoires' }); $event.stopPropagation()"
-              title="Ajouter aux favoris"
-            >
-              ❤️
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="addToCartFromHome({ id: 'p13', name: 'Sac assorti', price: 18000, image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=900&q=80' }); $event.stopPropagation()"
-            >
-              <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="goToProduct('p13'); $event.stopPropagation()"
-            >
-              <img src="assets/icons/oeil.svg" alt="Voir les détails" />
-            </button>
-          </div>
-        </div>
-        <h3 class="home-product-card__name">Sac assorti</h3>
-        <p class="home-product-card__price">18 000 FCFA</p>
-      </article>
-
-      <article
-        class="home-product-card home-product-card--top reveal"
-        data-delay="100"
-        *ngIf="activeCategory === 'accessoires'"
-      >
-        <div class="home-product-card__image-wrapper">
-          <img
-            src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=900&q=80"
-            alt="Accessoires wax"
-            class="home-product-card__image"
-          />
-          <div class="home-product-card__overlay">
-            <button
-              class="home-product-card__icon-btn home-product-card__icon-btn--heart"
-              [class.home-product-card__icon-btn--favorite]="favoritesService.isFavorite('p14')"
-              (click)="toggleFavorite({ id: 'p14', name: 'Accessoires wax', price: 15000, image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=900&q=80', categorySlug: 'accessoires' }); $event.stopPropagation()"
-              title="Ajouter aux favoris"
-            >
-              ❤️
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="addToCartFromHome({ id: 'p14', name: 'Accessoires wax', price: 15000, image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=900&q=80' }); $event.stopPropagation()"
-            >
-              <img src="assets/icons/cart.svg" alt="Ajouter au panier" />
-            </button>
-            <button
-              class="home-product-card__icon-btn"
-              (click)="goToProduct('p14'); $event.stopPropagation()"
-            >
-              <img src="assets/icons/oeil.svg" alt="Voir les détails" />
-            </button>
-          </div>
-        </div>
-        <h3 class="home-product-card__name">Accessoires wax</h3>
-        <p class="home-product-card__price">15 000 FCFA</p>
-      </article>
+  <!-- LOADING STATE -->
+  <section class="home-products" *ngIf="loading">
+    <p class="home-products__eyebrow">Chargement...</p>
+    <h2 class="home-products__title">Récupération des collections</h2>
+    <div class="home-products__loading">
+      <p>Un instant s’il vous plaît...</p>
     </div>
   </section>
 </div>
@@ -750,17 +249,9 @@
 
     <form class="home-newsletter__form">
       <div class="home-newsletter__input-wrapper reveal" data-delay="200">
-        <input
-          type="email"
-          class="home-newsletter__input"
-          placeholder="Entrez votre adresse e‑mail"
-        />
+        <input type="email" class="home-newsletter__input" placeholder="Entrez votre adresse e‑mail" />
       </div>
-      <button
-        type="submit"
-        class="home-newsletter__button reveal"
-        data-delay="300"
-      >
+      <button type="submit" class="home-newsletter__button reveal" data-delay="300">
         S'ABONNER
       </button>
 

@@ -2,11 +2,17 @@ import {
   Component,
   AfterViewInit,
   AfterViewChecked,
+  OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { CartService } from '../../services/cart.service';
 import { FavoritesService } from '../../services/favorites.service';
+import { ProductService, Product } from '../../services/product.service';
+import { CategoryService, Category } from '../../services/category.service';
+import { environment } from '../../../environments/environment';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-home',
@@ -15,8 +21,18 @@ import { FavoritesService } from '../../services/favorites.service';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
-export class HomeComponent implements AfterViewInit, AfterViewChecked {
+export class HomeComponent implements OnInit, AfterViewInit, AfterViewChecked {
   activeCategory: 'boubous' | 'robes' | 'ensembles' | 'accessoires' = 'boubous';
+
+  // Données depuis l'API
+  featuredProducts: Product[] = [];
+  newProducts: Product[] = [];
+  categories: Category[] = [];
+  bestSellerProduct: Product | null = null;
+  featuredProduct: Product | null = null;
+  allProducts: Product[] = [];
+  bestSellersProducts: Product[] = [];
+  loading = true;
 
   private observer: IntersectionObserver | null = null;
   private animationsInitialized = false;
@@ -25,7 +41,82 @@ export class HomeComponent implements AfterViewInit, AfterViewChecked {
     private router: Router,
     private cartService: CartService,
     public favoritesService: FavoritesService,
-  ) {}
+    private productService: ProductService,
+    private categoryService: CategoryService,
+    private toastService: ToastService
+  ) { }
+
+  ngOnInit(): void {
+    this.loadData();
+  }
+
+  loadData(): void {
+    this.loading = true;
+
+    // Charger les produits en vedette
+    this.productService.getFeaturedProducts().subscribe({
+      next: (products) => {
+        this.featuredProducts = products;
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des produits en vedette:', err);
+        this.loading = false;
+      }
+    });
+
+    // Charger les nouveaux produits
+    this.productService.getNewProducts().subscribe({
+      next: (products) => {
+        this.newProducts = products;
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des nouveaux produits:', err);
+      }
+    });
+
+    // Charger les catégories
+    this.categoryService.getCategories().subscribe({
+      next: (categories) => {
+        this.categories = categories;
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des catégories:', err);
+      }
+    });
+
+    // Charger les meilleures ventes (optionnel maintenant)
+    this.productService.getBestSellers().subscribe({
+      next: (products) => {
+        if (products.length > 0) {
+          this.bestSellerProduct = products[0];
+        }
+      }
+    });
+
+    // On synchronise les appels pour un filtrage propre
+    forkJoin({
+      featured: this.productService.getFeaturedProducts(),
+      all: this.productService.getProducts()
+    }).subscribe({
+      next: (result: { featured: Product[], all: Product[] }) => {
+        if (result.featured.length > 0) {
+          this.featuredProduct = result.featured[0];
+        }
+        // Exclure le produit vedette de la liste générale
+        this.allProducts = result.all.filter((p: Product) => p.id !== this.featuredProduct?.id);
+
+        // Stocker toutes les meilleures ventes pour les onglets
+        this.bestSellersProducts = result.all.filter((p: Product) => !!p.isBestSeller);
+
+        this.loading = false;
+      },
+      error: (err: any) => {
+        console.error('Erreur lors du chargement des produits synchronisés:', err);
+        this.loading = false;
+      }
+    });
+  }
 
   /* ---------- Animation scroll + compteurs ---------- */
 
@@ -113,47 +204,68 @@ export class HomeComponent implements AfterViewInit, AfterViewChecked {
 
   /* ---------- Panier ---------- */
 
-  addToCartFromHome(product: {
-    id: string;         // ✅ string
-    name: string;
-    price: number;
-    image: string;
-  }): void {
+  addToCartFromHome(product: Product): void {
     this.cartService.addItem({
-      productId: product.id,   // ✅ string
+      productId: product.id,
       name: product.name,
       price: product.price,
-      image: product.image,
+      image: product.images[0] || '/assets/placeholder.jpg',
       size: null,
       color: null,
       quantity: 1,
     });
 
-    alert(`${product.name} ajouté au panier !`);
+    this.toastService.success(`${product.name} ajouté au panier !`);
   }
 
   /* ---------- Favoris ---------- */
 
-  toggleFavorite(product: {
-    id: string;         // ✅ string
-    name: string;
-    price: number;
-    image: string;
-    categorySlug?: string;
-  }): void {
+  toggleFavorite(product: Product): void {
     const isFav = this.favoritesService.toggleFavorite({
-      productId: product.id,   // ✅ string
+      productId: product.id,
       name: product.name,
       price: product.price,
-      image: product.image,
-      categorySlug: product.categorySlug || '',
+      image: product.images[0] || '/assets/placeholder.jpg',
+      categorySlug: product.category?.slug || '',
       addedAt: new Date().toISOString(),
     });
 
     if (isFav) {
-      alert(`${product.name} ajouté aux favoris ❤️`);
+      this.toastService.success(`${product.name} ajouté aux favoris ❤️`);
     } else {
-      alert(`${product.name} retiré des favoris`);
+      this.toastService.info(`${product.name} retiré des favoris`);
     }
+  }
+
+  // Helper pour obtenir l'URL de l'image
+  getImageUrl(images: string[]): string {
+    if (!images || images.length === 0) {
+      return '/assets/placeholder.jpg';
+    }
+    // Si l'image commence par http, c'est une URL complète
+    if (images[0].startsWith('http')) {
+      return images[0];
+    }
+    // Sinon, c'est un chemin relatif vers le serveur backend
+    return `${environment.mediaUrl}${images[0]}`;
+  }
+
+  // Filtrer les meilleures ventes selon l'onglet actif
+  getFilteredBestSellers(): Product[] {
+    return this.bestSellersProducts.filter(product => {
+      const slug = product.category?.slug || '';
+      switch (this.activeCategory) {
+        case 'boubous':
+          return slug.includes('boubou');
+        case 'robes':
+          return slug === 'robes';
+        case 'ensembles':
+          return slug === 'ensembles';
+        case 'accessoires':
+          return slug === 'accessoires';
+        default:
+          return false;
+      }
+    });
   }
 }
